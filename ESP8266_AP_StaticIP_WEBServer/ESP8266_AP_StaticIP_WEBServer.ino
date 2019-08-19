@@ -23,6 +23,7 @@ ESP8266WebServer server(80);
 Servo myservo;
 
 bool ledState = false;
+int reedState = false;
 
 void handleRoot() {
 //  digitalWrite (LED_BUILTIN, 0); //turn the built in LED on pin DO of NodeMCU on
@@ -150,5 +151,11 @@ void setup() {
 }
 
 void loop() {
+  reedState = !digitalRead(reedPin);
+  if (reedState) {
+    myservo.write(90);
+  } else {
+    myservo.write(0);
+  }
   server.handleClient();
 }
