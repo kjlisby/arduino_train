@@ -212,6 +212,7 @@ void loop()
                         CanvasDisplay.println("Connection: keep-alive");
                         CanvasDisplay.println();
                         if (SearchForRequest(HTTP_requst, "GET /digital.htm")) html5File = SD.open("digital.htm"); 
+                        else if (SearchForRequest(HTTP_requst, "output_b9un9c.gif")) html5File = SD.open("output_b9un9c.gif");
                         else if (SearchForRequest(HTTP_requst, "GET /analog.htm")) html5File = SD.open("analog.htm");
                         else if (SearchForRequest(HTTP_requst, "GET /bargraph.htm")) html5File = SD.open("bargraph.htm");
                         else html5File = SD.open("gauge.htm");
