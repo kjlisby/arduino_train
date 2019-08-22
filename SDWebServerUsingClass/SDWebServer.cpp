@@ -254,6 +254,7 @@ void handleNotFound() {
 
 #define CS_PIN  D8
 SDWebServer::SDWebServer() {
+  WiFi.persistent(false);
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));   // subnet FF FF FF 00
   WiFi.softAP(ssid, password); 
