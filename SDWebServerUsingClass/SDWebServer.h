@@ -36,6 +36,7 @@
 class SDWebServer {
 	public:
 		SDWebServer();
+    void Init();
     ESP8266WebServer *getServer();
 	private:
 		const char* ssid = "ESP8266";

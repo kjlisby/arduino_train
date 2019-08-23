@@ -269,7 +269,12 @@ SDWebServer::SDWebServer() {
     returnOK();
   }, handleFileUpload);
   server.onNotFound(handleNotFound);
+}
 
+bool INITIALIZED = false;
+void SDWebServer::Init() {
+  if (INITIALIZED) return;
+  INITIALIZED = true;
   server.begin();
   Serial.println("HTTP server started");
   
