@@ -33,3 +33,12 @@ p {
 	height: 19px;
 	position:fixed;
 }
+
+.skinne {
+	object-fit: cover;
+	width: 519px;
+	height: 19px;
+	position:absolute;
+	margin: 0 0 0 0;
+	display: block;
+}
