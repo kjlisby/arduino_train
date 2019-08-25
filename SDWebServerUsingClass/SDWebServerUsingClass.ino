@@ -30,12 +30,27 @@
 */
 #include "SDWebServer.h"
 
+
+class MyHandler : public RequestHandler {
+ bool canHandle(HTTPMethod method, String uri) {
+   return uri.startsWith("/ajax_inputs");
+ }
+
+  bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {   
+    Serial.println("AJAX GETINPUT");
+  }
+} myHandler;
+
+
+
 SDWebServer *WS;
 void setup(void) {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.print("\n");
   WS = new SDWebServer();
+  WS->getServer()->addHandler(&myHandler);
+  WS->Init();
 }
 
 void loop(void) {
