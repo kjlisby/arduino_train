@@ -32,3 +32,16 @@ function warm(myId) {
 function cold(myId) {
 	document.getElementById(myId).src = "skinne_kold.jpg";
 }
+
+var slider = document.getElementById("Power1");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+ 
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+ 
+document.getElementById('reset1').onclick = function(){
+   document.getElementById('Power1').value = 0;
+   output.innerHTML = slider.value;
+}
