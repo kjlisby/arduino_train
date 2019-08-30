@@ -6,20 +6,11 @@
 </head>
 <body>
 
-<!--
-<h1>This is a Heading</h1>
--->
 <p id="demo">This is a paragraph.</p>
 <button type="button" onclick="myFunction()">Try it</button>
 <button type="button" onclick="flip('B4')">Flip B4</button>
 <button type="button" onclick="warm('B3')">Warm B3</button>
 <button type="button" onclick="cold('B3')">Cold B3</button>
-
-<!-- 
-<img id="B1" class="langskinne" src="skinne_kold.jpg" style="top: 50vh; left: 5px;"> 
-<img id="B2" class="kortskinne" src="skinne_varm.gif" style="top: 50vh; left: 50vw; transform:rotate(135deg)"> 
-<img id="B3" class="kortskinne" src="skinne_varm.gif" style="top: 60vh; left: 5px; transform:rotate(180deg)"> 
- -->
  
 <img id="B3"   class="skinne" src="skinne_varm.gif" style="width:  5vw; top:  9vw; left: 25vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
 <img id="T2_S" class="skinne" src="skinne_varm.gif" style="width:  5vw; top: 14vw; left: 25vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
@@ -42,8 +33,12 @@
 <div class="slidecontainer" style="top: 30vw; left: 25vw;">
   <input type="range" min="-100" max="100" value="0" class="slider" id="Power1">
 </div>
-
 <input id="reset1" type="button" class="placedButton" value="STOP" style="top: 30.2vw; left: 36vw;">
+
+<div class="checkbox" style="top: 17vw; left: 35vw">
+  <input type="checkbox" id="automode" name="automode" onclick="autoCheckbox()">
+  <label id="automodelabel" for="automode">Run trains automatically</label>
+</div>
 
 <script src="togbane.js"></script>
 </body>
