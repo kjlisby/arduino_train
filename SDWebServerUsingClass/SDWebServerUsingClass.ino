@@ -31,17 +31,96 @@
 #include "SDWebServer.h"
 
 
+
+/*--------------------------------------------------------------------------------
+ * ANOTHER CLASS TO CONTROL SOMETHING
+ */
+
+#include <Servo.h>
+
+#define ledPin 2 //Built-in LED Which lights up when the output is LOW
+#define reedPin 5 //Reed switch on GPIO5 / D1
+#define servoPin 4 // Servo on GPIO4 / D2
+int counter = 0;
+Servo myservo;
+bool ledState = false;
+int reedState = false;
+
 class MyHandler : public RequestHandler {
- bool canHandle(HTTPMethod method, String uri) {
-   return uri.startsWith("/ajax_inputs");
- }
+  bool canHandle(HTTPMethod method, String uri) {
+    return uri.startsWith("/ajax_");
+  }
 
   bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {   
     Serial.println("AJAX GETINPUT");
+    Serial.println(requestUri);
+
+    String cmdarray[10];
+    int index = 0;
+    int startindex = 0;
+    int cmd_length = 0;
+    while (index < requestUri.length()) {
+      if (requestUri[index] == '_') {
+        cmdarray[cmd_length] = requestUri.substring(startindex, index);
+        startindex = index+1;
+        cmd_length++;
+      }
+      index++;
+    }
+    cmdarray[cmd_length] = requestUri.substring(startindex);
+    index++;
+    cmd_length++;
+    
+    for (int i=0; i<cmd_length; i++) {
+      Serial.print(i); Serial.print(": ");
+      Serial.println(cmdarray[i]);
+    }
+
+    if (cmdarray[1].equals("set")) {
+      if (cmdarray[2].equals("B1")) {
+        Serial.println("SETTING B1 SERVO");
+        myservo.write(0);
+      }
+      if (cmdarray[2].equals("B2")) {
+        Serial.println("SETTING B2 SERVO");
+        myservo.write(45);
+      }
+    }
+    server.send(200, "text/plain", "");
   }
 } myHandler;
 
+void loopHandler() {
+    bool old_reedState = reedState;
+    reedState = !digitalRead(reedPin);
+    if (old_reedState != reedState) {
+      if (reedState) {
+        myservo.write(90);
+      } else {
+        myservo.write(0);
+      }
+    }
+    counter++;
+    if (counter > 500000) {
+      counter = 0;
+      Serial.println("TOGGLE LED");
+      digitalWrite (ledPin,!digitalRead(ledPin));
+    }
+}
 
+void initHandler() {
+  pinMode ( ledPin, OUTPUT );
+  digitalWrite ( ledPin, LOW );
+
+  pinMode (reedPin, INPUT_PULLUP);
+
+  myservo.attach(servoPin);
+  myservo.write(0);
+}
+
+/*
+ * -----------------------------------------------------------------------------------------------------------------------
+ */
 
 SDWebServer *WS;
 void setup(void) {
@@ -51,8 +130,10 @@ void setup(void) {
   WS = new SDWebServer();
   WS->getServer()->addHandler(&myHandler);
   WS->Init();
+  initHandler();
 }
 
 void loop(void) {
   WS->getServer()->handleClient();
+  loopHandler();
 }

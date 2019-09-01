@@ -80,7 +80,7 @@ b2.onclick = function(){
  activateB2();
 }
 function activateB1() {
-/*  call the ESP32 to activate B1
+/*  call the ESP32 to activate B1 */
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -91,23 +91,25 @@ function activateB1() {
   xhttp.open("GET", "ajax_set_B1", true);
   xhttp.send();
 
- */
+ /*
  B1activated();
+ */
 }
 function activateB2() {
-/*  call the ESP32 to activate B2
+/*  call the ESP32 to activate B2 */
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      B1activated();
+      B2activated();
     }
   };
   xhttp.open("GET", "ajax_set_B2", true);
   xhttp.send();
 
- */
+ /*
  B2activated();
+ */
 }
 function B1activated() {
  output.innerHTML = "B1 active";
