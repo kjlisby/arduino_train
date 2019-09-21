@@ -36,6 +36,9 @@
 ESP8266WebServer server(80);
 IPAddress apIP(42, 42, 42, 42);  // Defining a static IP address: local & gateway
                                  // Default IP in AP mode is 192.168.4.1
+IPAddress staticIP(192,168,1,2);
+IPAddress gateway(192,168,1,1);
+IPAddress subnet(255,255,255,0);
 boolean hasSD = false;
 
 void returnOK() {
@@ -256,11 +259,15 @@ void handleNotFound() {
 SDWebServer::SDWebServer() {
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP_STA);
-  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));   // subnet FF FF FF 00
+  WiFi.config(staticIP, gateway, subnet);
+  WiFi.softAPConfig(apIP, apIP, subnet);   // subnet FF FF FF 00
   WiFi.softAP(ssid, password); 
-  IPAddress myIP = WiFi.softAPIP(); 
+  IPAddress myAPIP = WiFi.softAPIP(); 
   Serial.print("AP IP address: "); 
-  Serial.println(myIP); 
+  Serial.println(myAPIP); 
+  IPAddress mySTAIP = WiFi.localIP(); 
+  Serial.print("STA IP address: "); 
+  Serial.println(mySTAIP); 
 
   server.on("/list", HTTP_GET, printDirectory);
   server.on("/edit", HTTP_DELETE, handleDelete);
