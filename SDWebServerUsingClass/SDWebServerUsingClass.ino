@@ -39,7 +39,7 @@
 #include <Servo.h>
 
 #define ledPin 2 //Built-in LED Which lights up when the output is LOW
-#define reedPin 5 //Reed switch on GPIO5 / D1
+const byte reedPin = 5; //Reed switch on GPIO5 / D1
 #define servoPin 4 // Servo on GPIO4 / D2
 int counter = 0;
 Servo myservo;
@@ -90,9 +90,32 @@ class MyHandler : public RequestHandler {
   }
 } myHandler;
 
+
+volatile unsigned long trainDetectionMillis = 0;
+ICACHE_RAM_ATTR void handleReedInterrupt() {
+  Serial.println("handleReedInterrupt");
+  trainDetectionMillis = millis();
+}
+boolean trainSeen() {
+//  Serial.print("trainSeen trainDetectionMillis==");
+//  Serial.print(trainDetectionMillis);
+//  Serial.print(" millis== ");
+//  Serial.println(millis());
+  if (trainDetectionMillis <= 0) {
+    return false;
+  }
+  if (millis()-trainDetectionMillis < 10000) {
+    return true;
+  }
+  trainDetectionMillis = 0;
+  return true;
+}
+
+boolean LEDstate = false;
 void loopHandler() {
     bool old_reedState = reedState;
-    reedState = !digitalRead(reedPin);
+//    reedState = !digitalRead(reedPin);
+    reedState = trainSeen();
     if (old_reedState != reedState) {
       if (reedState) {
         myservo.write(90);
@@ -103,17 +126,27 @@ void loopHandler() {
     counter++;
     if (counter > 500000) {
       counter = 0;
-      Serial.println("TOGGLE LED");
-      digitalWrite (ledPin,!digitalRead(ledPin));
+      Serial.print("TOGGLE LED ");
+//      digitalWrite (ledPin,!digitalRead(ledPin));
+      if (LEDstate) {
+        Serial.println("OFF");
+        LEDstate = false;
+        analogWrite(ledPin,2000);
+      } else {
+        Serial.println("ON");
+        LEDstate = true;
+        analogWrite(ledPin,1000);
+      }
     }
 }
 
 void initHandler() {
   pinMode ( ledPin, OUTPUT );
-  digitalWrite ( ledPin, LOW );
+  analogWrite ( ledPin, 0 );
 
   pinMode (reedPin, INPUT_PULLUP);
-
+  attachInterrupt(digitalPinToInterrupt(reedPin), handleReedInterrupt, FALLING);
+  
   myservo.attach(servoPin);
   myservo.write(0);
 }
