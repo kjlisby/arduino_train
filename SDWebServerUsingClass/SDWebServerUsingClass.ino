@@ -41,8 +41,14 @@
 #define ledPin 2 //Built-in LED Which lights up when the output is LOW
 const byte reedPin = 5; //Reed switch on GPIO5 / D1
 #define servoPin 4 // Servo on GPIO4 / D2
+#define sporskiftePin 0 // GPIO0 / D3
 int counter = 0;
 Servo myservo;
+Servo sporskifte;
+int sporskifte_act;
+int sporskifte_dest;
+unsigned long sporskifte_last_millis = 0;
+int sporskifte_detach_timer = 0;
 bool ledState = false;
 int reedState = false;
 
@@ -79,11 +85,13 @@ class MyHandler : public RequestHandler {
     if (cmdarray[1].equals("set")) {
       if (cmdarray[2].equals("B1")) {
         Serial.println("SETTING B1 SERVO");
-        myservo.write(0);
+        sporskifte.attach(sporskiftePin);
+        sporskifte_dest = 50;
       }
       if (cmdarray[2].equals("B2")) {
         Serial.println("SETTING B2 SERVO");
-        myservo.write(45);
+        sporskifte.attach(sporskiftePin);
+        sporskifte_dest = 145;
       }
     }
     server.send(200, "text/plain", "");
@@ -138,6 +146,26 @@ void loopHandler() {
         analogWrite(ledPin,1000);
       }
     }
+
+    unsigned long now = millis();
+    if (sporskifte_act != sporskifte_dest && now%20 == 0 && now != sporskifte_last_millis) {
+      sporskifte_last_millis = now;
+      if (sporskifte_act > sporskifte_dest) {
+        sporskifte_act--;
+      } else {
+        sporskifte_act++;
+      }
+      sporskifte.write(sporskifte_act);
+      if (sporskifte_act == sporskifte_dest) {
+        sporskifte_detach_timer = millis()+1000;
+      }
+    }
+    if (sporskifte_detach_timer > 0) {
+      if (millis() > sporskifte_detach_timer) {
+        sporskifte_detach_timer = 0;
+        sporskifte.detach();
+      }
+    }
 }
 
 void initHandler() {
@@ -149,6 +177,11 @@ void initHandler() {
   
   myservo.attach(servoPin);
   myservo.write(0);
+  sporskifte.attach(sporskiftePin);
+  sporskifte.write(90);
+  sporskifte_act  = 90;
+  sporskifte_dest = 90;
+  sporskifte_detach_timer = millis()+1000;
 }
 
 /*
