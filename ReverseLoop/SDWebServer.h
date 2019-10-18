@@ -31,26 +31,28 @@
 #ifndef SD_WEB_SERVER_H
 #define SD_WEB_SERVER_H
 
+#include <stdint.h>
+#include <WiFi.h>
 #include <WebServer.h>
+#include <SD.h>
 
 class SDWebServer {
 	public:
 		SDWebServer();
-    void Init();
-    WebServer *getServer();
+		void Init(uint8_t SDPin);
+		WebServer *getServer();
+    bool loadFromSdCard (String path);
 	private:
-		const char* ssid = "ESP8266";
-		const char* password = "ESP8266Test";
-//		File uploadFile;
-//		void returnOK();
-//		void returnFail(String msg);
-//		bool loadFromSdCard(String path);
-//		void handleFileUpload();
-//		void deleteRecursive(String path);
-//		void handleDelete();
-//		void handleCreate();
-//		void printDirectory();
-//		void handleNotFound();
+		uint8_t sd_pin;
+		const char* ssid = "ESP32Garden";
+		const char* password = "ESP32Test";
+		WebServer *server;
+    IPAddress *apIP;
+		IPAddress *staticIP;
+		IPAddress *gateway;
+		IPAddress *subnet;
+		void returnOK();
+		void returnFail (String msg);
 };
 
 #endif
