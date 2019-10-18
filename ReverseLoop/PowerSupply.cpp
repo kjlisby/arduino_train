@@ -1,19 +1,11 @@
 #include "PowerSupply.h"
 #include <Arduino.h>
 
-void PowerSupply::Disable() {
-  this->storedVoltage = this->voltage;
-  this->SetVoltage(0);
-  this->PSUstatus = false;
-}
-
 void PowerSupply::Init(uint8_t DacPin, uint8_t StatusPin, uint8_t RelayPin) {
 	this->dac_pin = DacPin;
 	this->status_pin = StatusPin;
 	this->relay_pin = RelayPin;
 	pinMode(this->relay_pin, OUTPUT);
-	pinMode(this->status_pin, INPUT_PULLUP);
-	
 	this->SetVoltage(0);
 	this->SetPolarity(true);
 }
@@ -45,4 +37,17 @@ bool PowerSupply::GetStatus() {
 void PowerSupply::ResetStatus() {
 	this->PSUstatus = true;
 	this->SetVoltage(this->storedVoltage);
+}
+
+void PowerSupply::PollShortcircuit() {
+	int value = analogRead(this->status_pin);
+	if (value > 1000) {
+		this->Disable();
+	}
+}
+
+void PowerSupply::Disable() {
+  this->storedVoltage = this->voltage;
+  this->SetVoltage(0);
+  this->PSUstatus = false;
 }

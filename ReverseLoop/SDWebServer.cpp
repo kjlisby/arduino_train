@@ -29,268 +29,94 @@
 
 */
 #include "SDWebServer.h"
-#include <WiFi.h>
-#include <WebServer.h>
-#include <SD.h>
 
-WebServer server(80);
-IPAddress apIP(42, 42, 42, 42);  // Defining a static IP address: local & gateway
-                                 // Default IP in AP mode is 192.168.4.1
-IPAddress staticIP(192,168,1,2);
-IPAddress gateway(192,168,1,1);
-IPAddress subnet(255,255,255,0);
-boolean hasSD = false;
-
-void returnOK() {
-  server.send(200, "text/plain", "");
+void SDWebServer::returnOK () {
+	this->server->send(200, "text/plain", "");
 }
 
-void returnFail(String msg) {
-  server.send(500, "text/plain", msg + "\r\n");
+void SDWebServer::returnFail (String msg) {
+	this->server->send(500, "text/plain", msg + "\r\n");
 }
 
-bool loadFromSdCard(String path) {
-  String dataType = "text/plain";
-  if (path.endsWith("/")) {
-    path += "index.htm";
-  }
-
-  if (path.endsWith(".src")) {
-    path = path.substring(0, path.lastIndexOf("."));
-  } else if (path.endsWith(".htm")) {
-    dataType = "text/html";
-  } else if (path.endsWith(".css")) {
-    dataType = "text/css";
-  } else if (path.endsWith(".js")) {
-    dataType = "application/javascript";
-  } else if (path.endsWith(".png")) {
-    dataType = "image/png";
-  } else if (path.endsWith(".gif")) {
-    dataType = "image/gif";
-  } else if (path.endsWith(".jpg")) {
-    dataType = "image/jpeg";
-  } else if (path.endsWith(".ico")) {
-    dataType = "image/x-icon";
-  } else if (path.endsWith(".xml")) {
-    dataType = "text/xml";
-  } else if (path.endsWith(".pdf")) {
-    dataType = "application/pdf";
-  } else if (path.endsWith(".zip")) {
-    dataType = "application/zip";
-  }
-
-  File dataFile = SD.open(path.c_str());
-  if (dataFile.isDirectory()) {
-    path += "/index.htm";
-    dataType = "text/html";
-    dataFile = SD.open(path.c_str());
-  }
-
-  if (!dataFile) {
-    return false;
-  }
-
-  if (server.hasArg("download")) {
-    dataType = "application/octet-stream";
-  }
-
-  if (server.streamFile(dataFile, dataType) != dataFile.size()) {
-    Serial.println("Sent less data than expected!");
-  }
-
-  dataFile.close();
-  return true;
+bool SDWebServer::loadFromSdCard (String path) {
+	String dataType = "text/plain";
+	if (path.endsWith("/")) {
+		path += "index.htm";
+	}
+	if (path.endsWith(".src")) {
+		path = path.substring(0, path.lastIndexOf("."));
+	} else if (path.endsWith(".htm")) {
+		dataType = "text/html";
+	} else if (path.endsWith(".css")) {
+		dataType = "text/css";
+	} else if (path.endsWith(".js")) {
+		dataType = "application/javascript";
+	} else if (path.endsWith(".png")) {
+		dataType = "image/png";
+	} else if (path.endsWith(".gif")) {
+		dataType = "image/gif";
+	} else if (path.endsWith(".jpg")) {
+		dataType = "image/jpeg";
+	} else if (path.endsWith(".ico")) {
+		dataType = "image/x-icon";
+	} else if (path.endsWith(".xml")) {
+		dataType = "text/xml";
+	} else if (path.endsWith(".pdf")) {
+		dataType = "application/pdf";
+	} else if (path.endsWith(".zip")) {
+		dataType = "application/zip";
+	}
+	File dataFile = SD.open(path.c_str());
+	if (dataFile.isDirectory()) {
+		path += "/index.htm";
+		dataType = "text/html";
+		dataFile = SD.open(path.c_str());
+	}
+	if (!dataFile) {
+		return false;
+	}
+	if (server->hasArg("download")) {
+		dataType = "application/octet-stream";
+	}
+	if (this->server->streamFile(dataFile, dataType) != dataFile.size()) {
+		Serial.println("Sent less data than expected!");
+	}
+	dataFile.close();
+	return true;
 }
 
-File uploadFile;
-void handleFileUpload() {
-  if (server.uri() != "/edit") {
-    return;
-  }
-  HTTPUpload& upload = server.upload();
-  if (upload.status == UPLOAD_FILE_START) {
-    if (SD.exists((char *)upload.filename.c_str())) {
-      SD.remove((char *)upload.filename.c_str());
-    }
-    uploadFile = SD.open(upload.filename.c_str(), FILE_WRITE);
-    Serial.print("Upload: START, filename: "); Serial.println(upload.filename);
-  } else if (upload.status == UPLOAD_FILE_WRITE) {
-    if (uploadFile) {
-      uploadFile.write(upload.buf, upload.currentSize);
-    }
-    Serial.print("Upload: WRITE, Bytes: "); Serial.println(upload.currentSize);
-  } else if (upload.status == UPLOAD_FILE_END) {
-    if (uploadFile) {
-      uploadFile.close();
-    }
-    Serial.print("Upload: END, Size: "); Serial.println(upload.totalSize);
-  }
-}
-
-void deleteRecursive(String path) {
-  File file = SD.open((char *)path.c_str());
-  if (!file.isDirectory()) {
-    file.close();
-    SD.remove((char *)path.c_str());
-    return;
-  }
-
-  file.rewindDirectory();
-  while (true) {
-    File entry = file.openNextFile();
-    if (!entry) {
-      break;
-    }
-    String entryPath = path + "/" + entry.name();
-    if (entry.isDirectory()) {
-      entry.close();
-      deleteRecursive(entryPath);
-    } else {
-      entry.close();
-      SD.remove((char *)entryPath.c_str());
-    }
-    yield();
-  }
-
-  SD.rmdir((char *)path.c_str());
-  file.close();
-}
-
-void handleDelete() {
-  if (server.args() == 0) {
-    return returnFail("BAD ARGS");
-  }
-  String path = server.arg(0);
-  if (path == "/" || !SD.exists((char *)path.c_str())) {
-    returnFail("BAD PATH");
-    return;
-  }
-  deleteRecursive(path);
-  returnOK();
-}
-
-void handleCreate() {
-  if (server.args() == 0) {
-    return returnFail("BAD ARGS");
-  }
-  String path = server.arg(0);
-  if (path == "/" || SD.exists((char *)path.c_str())) {
-    returnFail("BAD PATH");
-    return;
-  }
-
-  if (path.indexOf('.') > 0) {
-    File file = SD.open((char *)path.c_str(), FILE_WRITE);
-    if (file) {
-      //file.write((const char *)0);
-      file.close();
-    }
-  } else {
-    SD.mkdir((char *)path.c_str());
-  }
-  returnOK();
-}
-
-void printDirectory() {
-  if (!server.hasArg("dir")) {
-    return returnFail("BAD ARGS");
-  }
-  String path = server.arg("dir");
-  if (path != "/" && !SD.exists((char *)path.c_str())) {
-    return returnFail("BAD PATH");
-  }
-  File dir = SD.open((char *)path.c_str());
-  path = String();
-  if (!dir.isDirectory()) {
-    dir.close();
-    return returnFail("NOT DIR");
-  }
-  dir.rewindDirectory();
-  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-  server.send(200, "text/json", "");
-  WiFiClient client = server.client();
-
-  server.sendContent("[");
-  for (int cnt = 0; true; ++cnt) {
-    File entry = dir.openNextFile();
-    if (!entry) {
-      break;
-    }
-
-    String output;
-    if (cnt > 0) {
-      output = ',';
-    }
-
-    output += "{\"type\":\"";
-    output += (entry.isDirectory()) ? "dir" : "file";
-    output += "\",\"name\":\"";
-    output += entry.name();
-    output += "\"";
-    output += "}";
-    server.sendContent(output);
-    entry.close();
-  }
-  server.sendContent("]");
-  dir.close();
-}
-
-void handleNotFound() {
-  if (hasSD && loadFromSdCard(server.uri())) {
-    return;
-  }
-  String message = "SDCARD Not Detected\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " NAME:" + server.argName(i) + "\n VALUE:" + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-  Serial.print(message);
-}
-
-
-#define CS_PIN  8
 SDWebServer::SDWebServer() {
-  WiFi.persistent(false);
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.config(staticIP, gateway, subnet);
-  WiFi.softAPConfig(apIP, apIP, subnet);   // subnet FF FF FF 00
-  WiFi.softAP(ssid, password); 
-  IPAddress myAPIP = WiFi.softAPIP(); 
-  Serial.print("AP IP address: "); 
-  Serial.println(myAPIP); 
-  IPAddress mySTAIP = WiFi.localIP(); 
-  Serial.print("STA IP address: "); 
-  Serial.println(mySTAIP); 
-
-  server.on("/list", HTTP_GET, printDirectory);
-  server.on("/edit", HTTP_DELETE, handleDelete);
-  server.on("/edit", HTTP_PUT, handleCreate);
-  server.on("/edit", HTTP_POST, []() {
-    returnOK();
-  }, handleFileUpload);
-  server.onNotFound(handleNotFound);
+	this->server   = new WebServer(80);
+	this->apIP     = new IPAddress(42, 42, 42, 42);
+	this->staticIP = new IPAddress(192,168,1,200);
+	this->gateway  = new IPAddress(192,168,1,1);
+	this->subnet   = new IPAddress(255,255,255,0);
+	WiFi.persistent(false);
+	WiFi.mode(WIFI_AP_STA);
+	WiFi.config(*(this->staticIP), *(this->gateway), *(this->subnet));
+	WiFi.softAPConfig(*(this->apIP), *(this->apIP), *(this->subnet));
+	WiFi.softAP(this->ssid, this->password); 
+	IPAddress myAPIP = WiFi.softAPIP(); 
+	Serial.print("AP IP address: "); 
+	Serial.println(myAPIP); 
+	IPAddress mySTAIP = WiFi.localIP(); 
+	Serial.print("STA IP address: "); 
+	Serial.println(mySTAIP);
 }
 
 bool INITIALIZED = false;
-void SDWebServer::Init() {
-  if (INITIALIZED) return;
-  INITIALIZED = true;
-  server.begin();
-  Serial.println("HTTP server started");
-  
-  if (SD.begin(CS_PIN)) {
-    Serial.println("SD Card initialized.");
-    hasSD = true;
-  }
+void SDWebServer::Init(uint8_t SDPin) {
+	if (INITIALIZED) return;
+	INITIALIZED = true;
+	
+	this->sd_pin = SDPin;
+	server->begin();
+	Serial.println("HTTP server started");
+	if (SD.begin(this->sd_pin)) {
+		Serial.println("SD Card initialized.");
+	}
 }
 
 WebServer *SDWebServer::getServer() {
-  return &server;
+	return server;
 }

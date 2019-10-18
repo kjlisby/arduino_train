@@ -1,36 +1,32 @@
-/*
-  SDWebServer class
-
-  Heavily inspired by the Example WebServer with SD Card backend for esp8266
-  Which is Copyright (c) 2015 Hristo Gochkov. All rights reserved.
-  This file is part of the ESP8266WebServer library for Arduino environment.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-  Have a FAT Formatted SD Card connected to the SPI port of the ESP8266
-  The web root is the SD Card root folder
-  File extensions with more than 3 charecters are not supported by the SD Library
-  File Names longer than 8 charecters will be truncated by the SD library, so keep filenames shorter
-  index.htm is the default index (works on subfolders as well)
-
-  upload the contents of SdRoot to the root of the SDcard and access the editor by going to http://esp8266sd.local/edit
-
-*/
 #include "SDWebServer.h"
 #include "PowerSupply.h"
+#include "Turnout.h"
+#include "TrainDetector.h"
 
+
+#define SD_CS_PIN       5
+#define SD_D1_MOSI_PIN 23
+#define SD_SCLK_PIN    18
+#define SD_D0_MISO_PIN 19
+#define TURNOUT1_PIN  16
+#define TRAIN_SENSOR1 34
+#define TRAIN_SENSOR2 35
+#define TRAIN_SENSOR3 36
+#define TRAIN_SENSOR4 39
+#define PSU1_DAC_PIN 25
+#define PSU1_ADC_PIN 32
+#define PSU1_POL_PIN 17
+#define PSU2_DAC_PIN 26
+#define PSU2_ADC_PIN 33
+#define PSU2_POL_PIN 21
+SDWebServer *WS;
+PowerSupply *PSU1;
+PowerSupply *PSU2;
+Turnout     *TU;
+TrainDetector *TD1;
+TrainDetector *TD2;
+TrainDetector *TD3;
+TrainDetector *TD4;
 
 /*--------------------------------------------------------------------------------
  * ANOTHER CLASS TO CONTROL SOMETHING
@@ -41,14 +37,8 @@
 #define ledPin 2 //Built-in LED Which lights up when the output is LOW
 const byte reedPin = 5; //Reed switch on GPIO5 / D1
 #define servoPin 4 // Servo on GPIO4 / D2
-#define sporskiftePin 0 // GPIO0 / D3
 int counter = 0;
 Servo myservo;
-Servo sporskifte;
-int sporskifte_act;
-int sporskifte_dest;
-unsigned long sporskifte_last_millis = 0;
-int sporskifte_detach_timer = 0;
 bool ledState = false;
 int reedState = false;
 
@@ -84,14 +74,10 @@ class MyHandler : public RequestHandler {
 
     if (cmdarray[1].equals("set")) {
       if (cmdarray[2].equals("B1")) {
-        Serial.println("SETTING B1 SERVO");
-        sporskifte.attach(sporskiftePin);
-        sporskifte_dest = 50;
+		  TU->Close();
       }
       if (cmdarray[2].equals("B2")) {
-        Serial.println("SETTING B2 SERVO");
-        sporskifte.attach(sporskiftePin);
-        sporskifte_dest = 145;
+		  TU->Throw();
       }
     }
     server.send(200, "text/plain", "");
@@ -146,26 +132,6 @@ void loopHandler() {
         analogWrite(ledPin,1000);
       }
     }
-
-    unsigned long now = millis();
-    if (sporskifte_act != sporskifte_dest && now%20 == 0 && now != sporskifte_last_millis) {
-      sporskifte_last_millis = now;
-      if (sporskifte_act > sporskifte_dest) {
-        sporskifte_act--;
-      } else {
-        sporskifte_act++;
-      }
-      sporskifte.write(sporskifte_act);
-      if (sporskifte_act == sporskifte_dest) {
-        sporskifte_detach_timer = millis()+1000;
-      }
-    }
-    if (sporskifte_detach_timer > 0) {
-      if (millis() > sporskifte_detach_timer) {
-        sporskifte_detach_timer = 0;
-        sporskifte.detach();
-      }
-    }
 }
 
 void initHandler() {
@@ -174,51 +140,78 @@ void initHandler() {
 
   pinMode (reedPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(reedPin), handleReedInterrupt, FALLING);
-  
-  myservo.attach(servoPin);
-  myservo.write(0);
-  sporskifte.attach(sporskiftePin);
-  sporskifte.write(90);
-  sporskifte_act  = 90;
-  sporskifte_dest = 90;
-  sporskifte_detach_timer = millis()+1000;
 }
 
 /*
  * -----------------------------------------------------------------------------------------------------------------------
  */
 
-PowerSupply *PSU1;
-PowerSupply *PSU2;
-ICACHE_RAM_ATTR void handlePSUStatusInterrupt1() {
-  PSU1->Disable();
-}
-ICACHE_RAM_ATTR void handlePSUStatusInterrupt2() {
-  PSU2->Disable();
-}
+
 void InitPowerSupplies() {
   PSU1 = new PowerSupply();
-  PSU1->Init(25, 27, 28);
-  attachInterrupt(digitalPinToInterrupt(27), handlePSUStatusInterrupt1, RISING);
+  PSU1->Init(PSU1_DAC_PIN, PSU1_ADC_PIN, PSU1_POL_PIN);
   PSU2 = new PowerSupply();
-  PSU2->Init(26, 29, 30);
-  attachInterrupt(digitalPinToInterrupt(29), handlePSUStatusInterrupt2, RISING);
+  PSU2->Init(PSU2_DAC_PIN, PSU2_ADC_PIN, PSU2_POL_PIN);
 }
 
+void SDWebServer_handleNotFound() {
+  WS->loadFromSdCard(WS->getServer()->uri());
+}
 
-SDWebServer *WS;
+volatile unsigned long trainDetectionMillis1 = 0;
+ICACHE_RAM_ATTR void handleTrainDetectorInterrupt1() {
+	Serial.println("handleTrainDetectorInterrupt1");
+	trainDetectionMillis1 = millis();
+}
+volatile unsigned long trainDetectionMillis2 = 0;
+ICACHE_RAM_ATTR void handleTrainDetectorInterrupt2() {
+	Serial.println("handleTrainDetectorInterrupt2");
+	trainDetectionMillis2 = millis();
+}
+volatile unsigned long trainDetectionMillis3 = 0;
+ICACHE_RAM_ATTR void handleTrainDetectorInterrupt3() {
+	Serial.println("handleTrainDetectorInterrupt3");
+	trainDetectionMillis3 = millis();
+}
+volatile unsigned long trainDetectionMillis4 = 0;
+ICACHE_RAM_ATTR void handleTrainDetectorInterrupt4() {
+	Serial.println("handleTrainDetectorInterrupt4");
+	trainDetectionMillis4 = millis();
+}
+void InitTrainDetectors () {
+	TD1 = new TrainDetector();
+	TD1->Init(TRAIN_SENSOR1, &trainDetectionMillis1);
+	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR1), handleTrainDetectorInterrupt1, FALLING);
+	TD2 = new TrainDetector();
+	TD2->Init(TRAIN_SENSOR2, &trainDetectionMillis2);
+	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR2), handleTrainDetectorInterrupt2, FALLING);
+	TD3 = new TrainDetector();
+	TD3->Init(TRAIN_SENSOR3, &trainDetectionMillis3);
+	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR3), handleTrainDetectorInterrupt3, FALLING);
+	TD4 = new TrainDetector();
+	TD4->Init(TRAIN_SENSOR4, &trainDetectionMillis4);
+	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR4), handleTrainDetectorInterrupt4, FALLING);
+}
+
 void setup(void) {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.print("\n");
   WS = new SDWebServer();
+  WS->getServer()->onNotFound(SDWebServer_handleNotFound);
   WS->getServer()->addHandler(&myHandler);
-  WS->Init();
+  WS->Init(SD_CS_PIN);
   InitPowerSupplies();
+  TU = new Turnout();
+  TU->Init(TURNOUT1_PIN);
+  InitTrainDetectors();
   initHandler();
 }
 
 void loop(void) {
   WS->getServer()->handleClient();
+  PSU1->PollShortcircuit();
+  PSU2->PollShortcircuit();
+  TU->Loop();
   loopHandler();
 }
