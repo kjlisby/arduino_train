@@ -12,13 +12,13 @@ void Turnout::Init(uint8_t ServoPin) {
 void Turnout::Throw() {
 	Serial.println("SETTING B2 SERVO");
 	this->turnout.attach(this->servo_pin);
-	this->pos_dest = 145;
+	this->pos_dest = 125;
 }
 
 void Turnout::Close() {
 	Serial.println("SETTING B1 SERVO");
 	this->turnout.attach(this->servo_pin);
-	this->pos_dest = 50;
+	this->pos_dest = 60;
 }
 
 void Turnout::Loop() {

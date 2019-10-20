@@ -8,21 +8,23 @@
 #define SD_D1_MOSI_PIN 23
 #define SD_SCLK_PIN    18
 #define SD_D0_MISO_PIN 19
-#define TURNOUT1_PIN  16
-#define TRAIN_SENSOR1 34
-#define TRAIN_SENSOR2 35
-#define TRAIN_SENSOR3 36
-#define TRAIN_SENSOR4 39
-#define PSU1_DAC_PIN 25
-#define PSU1_ADC_PIN 32
-#define PSU1_POL_PIN 17
-#define PSU2_DAC_PIN 26
-#define PSU2_ADC_PIN 33
-#define PSU2_POL_PIN 21
-SDWebServer *WS;
-PowerSupply *PSU1;
-PowerSupply *PSU2;
-Turnout     *TU;
+#define I2C_SDA_PIN    21
+#define I2C_SCL_PIN    22
+#define TURNOUT1_PIN   16
+#define TRAIN_SENSOR1  34
+#define TRAIN_SENSOR2  35
+#define TRAIN_SENSOR3  36
+#define TRAIN_SENSOR4  39
+#define PSU1_DAC_PIN   25
+#define PSU1_ADC_PIN   32
+#define PSU1_POL_PIN   17
+#define PSU2_DAC_PIN   26
+#define PSU2_ADC_PIN   33
+#define PSU2_POL_PIN   27
+SDWebServer   *WS;
+PowerSupply   *PSU1;
+PowerSupply   *PSU2;
+Turnout       *TU;
 TrainDetector *TD1;
 TrainDetector *TD2;
 TrainDetector *TD3;
@@ -34,11 +36,8 @@ TrainDetector *TD4;
 
 #include <ESP32Servo.h>
 
-#define ledPin 2 //Built-in LED Which lights up when the output is LOW
-const byte reedPin = 5; //Reed switch on GPIO5 / D1
-#define servoPin 4 // Servo on GPIO4 / D2
+#define ledPin LED_BUILTIN
 int counter = 0;
-Servo myservo;
 bool ledState = false;
 int reedState = false;
 
@@ -74,47 +73,30 @@ class MyHandler : public RequestHandler {
 
     if (cmdarray[1].equals("set")) {
       if (cmdarray[2].equals("B1")) {
-		  TU->Close();
+        TU->Throw();
       }
       if (cmdarray[2].equals("B2")) {
-		  TU->Throw();
+        TU->Close();
       }
     }
     server.send(200, "text/plain", "");
   }
 } myHandler;
 
-
-volatile unsigned long trainDetectionMillis = 0;
-ICACHE_RAM_ATTR void handleReedInterrupt() {
-  Serial.println("handleReedInterrupt");
-  trainDetectionMillis = millis();
-}
-boolean trainSeen() {
-//  Serial.print("trainSeen trainDetectionMillis==");
-//  Serial.print(trainDetectionMillis);
-//  Serial.print(" millis== ");
-//  Serial.println(millis());
-  if (trainDetectionMillis <= 0) {
-    return false;
-  }
-  if (millis()-trainDetectionMillis < 10000) {
-    return true;
-  }
-  trainDetectionMillis = 0;
-  return true;
-}
-
 boolean LEDstate = false;
 void loopHandler() {
     bool old_reedState = reedState;
-//    reedState = !digitalRead(reedPin);
-    reedState = trainSeen();
+    reedState = TD1->TrainSeen();
     if (old_reedState != reedState) {
       if (reedState) {
-        myservo.write(90);
+        analogWrite(ledPin,255);
+        PSU1->ResetStatus();
+        PSU1->SetVoltage(255);
+        PSU1->SetPolarity(false);
       } else {
-        myservo.write(0);
+        analogWrite(ledPin,25);
+        PSU1->SetVoltage(0);
+        PSU1->SetPolarity(true);
       }
     }
     counter++;
@@ -125,11 +107,11 @@ void loopHandler() {
       if (LEDstate) {
         Serial.println("OFF");
         LEDstate = false;
-        analogWrite(ledPin,2000);
+        analogWrite(ledPin,0);
       } else {
         Serial.println("ON");
         LEDstate = true;
-        analogWrite(ledPin,1000);
+        analogWrite(ledPin,100);
       }
     }
 }
@@ -137,9 +119,6 @@ void loopHandler() {
 void initHandler() {
   pinMode ( ledPin, OUTPUT );
   analogWrite ( ledPin, 0 );
-
-  pinMode (reedPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(reedPin), handleReedInterrupt, FALLING);
 }
 
 /*
@@ -165,17 +144,17 @@ ICACHE_RAM_ATTR void handleTrainDetectorInterrupt1() {
 }
 volatile unsigned long trainDetectionMillis2 = 0;
 ICACHE_RAM_ATTR void handleTrainDetectorInterrupt2() {
-	Serial.println("handleTrainDetectorInterrupt2");
+//	Serial.println("handleTrainDetectorInterrupt2");
 	trainDetectionMillis2 = millis();
 }
 volatile unsigned long trainDetectionMillis3 = 0;
 ICACHE_RAM_ATTR void handleTrainDetectorInterrupt3() {
-	Serial.println("handleTrainDetectorInterrupt3");
+//	Serial.println("handleTrainDetectorInterrupt3");
 	trainDetectionMillis3 = millis();
 }
 volatile unsigned long trainDetectionMillis4 = 0;
 ICACHE_RAM_ATTR void handleTrainDetectorInterrupt4() {
-	Serial.println("handleTrainDetectorInterrupt4");
+//	Serial.println("handleTrainDetectorInterrupt4");
 	trainDetectionMillis4 = millis();
 }
 void InitTrainDetectors () {

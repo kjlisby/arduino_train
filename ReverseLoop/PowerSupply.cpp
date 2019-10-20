@@ -12,6 +12,8 @@ void PowerSupply::Init(uint8_t DacPin, uint8_t StatusPin, uint8_t RelayPin) {
 
 void PowerSupply::SetVoltage(uint8_t Voltage) {
 	if (this->PSUstatus) {
+    Serial.print("PowerSupply::SetVoltage ");
+    Serial.println(Voltage);
 		dacWrite(this->dac_pin, Voltage);
 		this->voltage = Voltage;
 	}
@@ -41,12 +43,20 @@ void PowerSupply::ResetStatus() {
 
 void PowerSupply::PollShortcircuit() {
 	int value = analogRead(this->status_pin);
-	if (value > 1000) {
+  if (this->status_pin == 32 && millis() % 30000 == 0) {
+    Serial.print("Short circuit detection measure: ");
+    Serial.println(value);
+  }
+	if (value > 1000 && millis() > 5000) {
 		this->Disable();
 	}
 }
 
 void PowerSupply::Disable() {
+  if (this->PSUstatus) {
+    Serial.print("PowerSupply::Disable ");
+    Serial.println(this->status_pin);
+  }
   this->storedVoltage = this->voltage;
   this->SetVoltage(0);
   this->PSUstatus = false;
