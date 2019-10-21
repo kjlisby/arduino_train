@@ -1,4 +1,4 @@
-## arduino_train
+# Arduino code for garden traincontrol
 Arduino sketches for controlling my specific train layout utilizing an ESP32.
 
 Most parts of this repository are pre-studies that I am using for desktop testing only. These parts will be deleted soon.
@@ -7,7 +7,7 @@ The first part, that will be used for controlling a real train, is in the direct
               
 The train control is targeting a yet non-existing LGB and/or Piko garden train layout with a relatively long stretch of track with a reversing loop in each end and sidings along the stretch as well as in one of the reversing loops. But that is not until the first reversing loop is fully functional.
 
-# Hardware
+## Hardware
 
 The hardware consist of:
   - ESP32 DoIT module (serving the train control and a WEB page turning a phone into the UI)
