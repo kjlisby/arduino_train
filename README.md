@@ -3,14 +3,7 @@ Arduino sketches for controlling my specific train layout utilizing an ESP32.
 
 Most parts of this repository are pre-studies that I am using for desktop testing only. These parts will be deleted soon.
 
-The first part, that will be used for controlling a real train, is in the directory ReverseLoop. As its name suggests, that sketch will be controlling one train through a reversing loop back and forth. I.e. a laout as this:
-
------------------------\
-          \             \
-           \             |
-            \           /
-             \         /
-              \-------/
+The first part, that will be used for controlling a real train, is in the directory ReverseLoop. As its name suggests, that sketch will be controlling one train through a reversing loop back and forth.
               
 The train control is targeting a yet non-existing LGB and/or Piko garden train layout with a relatively long stretch of track with a reversing loop in each end and sidings along the stretch as well as in one of the reversing loops. But that is not until the first reversing loop is fully functional.
 
