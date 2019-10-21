@@ -91,12 +91,10 @@ void loopHandler() {
       if (reedState) {
         analogWrite(ledPin,255);
         PSU1->ResetStatus();
-        PSU1->SetVoltage(255);
-        PSU1->SetPolarity(false);
+        PSU1->SetSpeed(-255);
       } else {
         analogWrite(ledPin,25);
-        PSU1->SetVoltage(0);
-        PSU1->SetPolarity(true);
+        PSU1->SetSpeed(0);
       }
     }
     counter++;
@@ -189,8 +187,8 @@ void setup(void) {
 
 void loop(void) {
   WS->getServer()->handleClient();
-  PSU1->PollShortcircuit();
-  PSU2->PollShortcircuit();
+  PSU1->Loop();
+  PSU2->Loop();
   TU->Loop();
   loopHandler();
 }

@@ -6,30 +6,35 @@ void PowerSupply::Init(uint8_t DacPin, uint8_t StatusPin, uint8_t RelayPin) {
 	this->status_pin = StatusPin;
 	this->relay_pin = RelayPin;
 	pinMode(this->relay_pin, OUTPUT);
-	this->SetVoltage(0);
-	this->SetPolarity(true);
+	this->STOP();
 }
 
-void PowerSupply::SetVoltage(uint8_t Voltage) {
+void PowerSupply::SetSpeed(int Speed) {
 	if (this->PSUstatus) {
-    Serial.print("PowerSupply::SetVoltage ");
-    Serial.println(Voltage);
-		dacWrite(this->dac_pin, Voltage);
-		this->voltage = Voltage;
+		Serial.print("PowerSupply::SetSpeed ");
+		Serial.println(Speed);
+		if (Speed > 255 || Speed < -255) {
+			Serial.println("ILLEGAL SPEED");
+			return;
+		}
+		this->desired_speed = Speed;
 	}
 }
 
-void PowerSupply::SetPolarity(bool Polarity) {
-	digitalWrite(this->relay_pin, Polarity);
-	this->polarity = Polarity;
+void PowerSupply::STOP() {
+  dacWrite(this->dac_pin, 0);
+  this->current_speed = 0;
+  this->desired_speed = 0;
+  this->ReverseDirection(false);
+}
+   
+void PowerSupply::ReverseDirection(bool Reverse) {
+	digitalWrite(this->relay_pin, Reverse);
+	this->direction_reversed = Reverse;
 }
 
-uint8_t PowerSupply::GetVoltage() {
-	return this->voltage;
-}
-
-bool PowerSupply::GetPolarity() {
-	return this->polarity;
+int PowerSupply::GetSpeed() {
+	return this->current_speed;
 }
 
 bool PowerSupply::GetStatus() {
@@ -38,7 +43,6 @@ bool PowerSupply::GetStatus() {
 
 void PowerSupply::ResetStatus() {
 	this->PSUstatus = true;
-	this->SetVoltage(this->storedVoltage);
 }
 
 void PowerSupply::PollShortcircuit() {
@@ -57,7 +61,21 @@ void PowerSupply::Disable() {
     Serial.print("PowerSupply::Disable ");
     Serial.println(this->status_pin);
   }
-  this->storedVoltage = this->voltage;
-  this->SetVoltage(0);
+  this->STOP();
   this->PSUstatus = false;
+}
+
+void PowerSupply::Loop() {
+  this->PollShortcircuit();
+  unsigned long now = millis();
+  if (this->current_speed != this->desired_speed && now%20 == 0 && now != this->last_millis) {
+    this->last_millis = now;
+    if (this->current_speed > this->desired_speed) {
+      this->current_speed--;
+    } else {
+      this->current_speed++;
+    }
+    this->ReverseDirection(current_speed < 0);
+    dacWrite(this->dac_pin, abs(current_speed));
+  }
 }
