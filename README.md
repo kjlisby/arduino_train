@@ -1,4 +1,4 @@
-# Arduino code for garden traincontrol
+# Arduino code for garden train control
 Arduino sketches for controlling my specific train layout utilizing an ESP32.
 
 Most parts of this repository are pre-studies that I am using for desktop testing only. These parts will be deleted soon.
