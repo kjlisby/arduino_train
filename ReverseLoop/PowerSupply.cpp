@@ -25,12 +25,15 @@ void PowerSupply::STOP() {
   dacWrite(this->dac_pin, 0);
   this->current_speed = 0;
   this->desired_speed = 0;
-  this->ReverseDirection(false);
+  this->direction_reversed = false;
+  digitalWrite(this->relay_pin, 0);
 }
    
 void PowerSupply::ReverseDirection(bool Reverse) {
-	digitalWrite(this->relay_pin, Reverse);
-	this->direction_reversed = Reverse;
+  digitalWrite(this->relay_pin, Reverse);
+  this->direction_reversed = Reverse;
+  this->current_speed *= -1;
+  this->desired_speed *= -1;
 }
 
 int PowerSupply::GetSpeed() {
@@ -75,7 +78,8 @@ void PowerSupply::Loop() {
     } else {
       this->current_speed++;
     }
-    this->ReverseDirection(current_speed < 0);
+    this->direction_reversed = (current_speed < 0);
+    digitalWrite(this->relay_pin, direction_reversed);
     dacWrite(this->dac_pin, abs(current_speed));
   }
 }
