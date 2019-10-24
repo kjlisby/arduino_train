@@ -12,10 +12,10 @@
 #define I2C_SDA_PIN    21
 #define I2C_SCL_PIN    22
 #define TURNOUT1_PIN   16
-#define TRAIN_SENSOR1  34
-#define TRAIN_SENSOR2  35
-#define TRAIN_SENSOR3  36
-#define TRAIN_SENSOR4  39
+#define TRAIN_SENSOR1  34 // This port has no internal pullup, so an external 10-100k is needed
+#define TRAIN_SENSOR2  35 // This port has no internal pullup, so an external 10-100k is needed
+#define TRAIN_SENSOR3  36 // This port has no internal pullup, so an external 10-100k is needed
+#define TRAIN_SENSOR4  39 // This port has no internal pullup, so an external 10-100k is needed
 #define PSU1_DAC_PIN   25
 #define PSU1_ADC_PIN   32
 #define PSU1_POL_PIN   17
