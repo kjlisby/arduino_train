@@ -7,12 +7,16 @@
 
 class ReverseLoop {
 	public:
-		void Init(Turnout *TU, TrainDetector *TD, void (*TrainDetectedCallback)() CB);
+		void Init(PowerSupply *PSU, Turnout *TU, TrainDetector *TD, void (*TrainDetectedCallback)() CB);
 		void Attention();
+	        void Loop();
 	private:
+	        PowerSupply *psu;
 		Turnout *tu;
 		TrainDetector *td;
 		void (*tdcb)();
+	        bool active;
+	        unsigned long wait_millis;
 };
 
 #endif
