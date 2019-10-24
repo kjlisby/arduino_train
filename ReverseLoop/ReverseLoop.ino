@@ -3,6 +3,7 @@
 #include "PowerSupply.h"
 #include "Turnout.h"
 #include "TrainDetector.h"
+#include "ReverseLoop.h"
 
 
 #define SD_CS_PIN       5
@@ -31,6 +32,7 @@ TrainDetector *TD1;
 TrainDetector *TD2;
 TrainDetector *TD3;
 TrainDetector *TD4;
+ReverseLoop   *RL;
 
 
 void InitPowerSupplies() {
@@ -79,6 +81,15 @@ void InitTrainDetectors () {
 	// attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR4), handleTrainDetectorInterrupt4, FALLING);
 }
 
+unsigned long NextLoopTime = 0;
+void LoopDone() {
+  NextLoopTime = millis()+random(10000, 50000);
+}
+void StartLoop() {
+  NextLoopTime = 0;
+  RL->Attention();
+}
+
 void setup(void) {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
@@ -92,6 +103,8 @@ void setup(void) {
   TU = new Turnout();
   TU->Init(TURNOUT1_PIN);
   InitTrainDetectors();
+  RL = new ReverseLoop();
+  RL->Init(PSU1, TU, TD1, LoopDone);
 }
 
 void loop(void) {
@@ -100,4 +113,10 @@ void loop(void) {
   PSU2->Loop();
   TU->Loop();
   AH->Loop();
+  RL->Loop();
+  if (NextLoopTime > 0) {
+     if (millis() > NextLoopTime) {
+       StartLoop();
+     }
+  }
 }
