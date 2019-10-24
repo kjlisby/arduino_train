@@ -81,6 +81,7 @@ void InitTrainDetectors () {
 	// attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR4), handleTrainDetectorInterrupt4, FALLING);
 }
 
+bool AutoMode = true;
 unsigned long NextLoopTime = 0;
 void LoopDone() {
   NextLoopTime = millis()+random(10000, 50000);
@@ -115,7 +116,7 @@ void loop(void) {
   AH->Loop();
   RL->Loop();
   if (NextLoopTime > 0) {
-     if (millis() > NextLoopTime) {
+     if (AutoMode && millis() > NextLoopTime) {
        StartLoop();
      }
   }

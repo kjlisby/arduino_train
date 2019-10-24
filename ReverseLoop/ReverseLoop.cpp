@@ -1,3 +1,5 @@
+#include "ReverseLoop.h"
+
 void ReverseLoop::Init(PowerSupply *PSU, Turnout *TU, TrainDetector *TD, void (*TrainDetectedCallback)()) {
   this->psu = PSU;
   this->tu = TU;
