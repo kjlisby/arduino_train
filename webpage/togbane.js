@@ -56,11 +56,21 @@ function setPower1(value) {
 
 
 var t1s = document.getElementById("T1_S");
-var t2s = document.getElementById("T2_S");
 var t1t = document.getElementById("T1_T");
 var t2t = document.getElementById("T2_T");
+var t2s = document.getElementById("T2_S");
+var t3s = document.getElementById("T3_S");
+var t3t = document.getElementById("T3_T");
+var t4t = document.getElementById("T4_T");
+var t4s = document.getElementById("T4_S");
+var t5s = document.getElementById("T5_S");
+var t5t = document.getElementById("T5_T");
+var t6t = document.getElementById("T6_T");
+var t6s = document.getElementById("T6_S");
 var b1 = document.getElementById("B1");
 var b2 = document.getElementById("B2");
+var b5 = document.getElementById("B5");
+var b6 = document.getElementById("B6");
 t1s.onclick = function(){
  activateB2();
 }

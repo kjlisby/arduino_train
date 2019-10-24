@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="togbane.css">
+<title>Togbane</title>
+</head>
+<body>
+
+<p id="demo">This is a paragraph.</p>
+<button type="button" onclick="myFunction()">Try it</button>
+<button type="button" onclick="flip('B4')">Flip B4</button>
+<button type="button" onclick="warm('B3')">Warm B3</button>
+<button type="button" onclick="cold('B3')">Cold B3</button>
+ 
+<img id="B3"   class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  9vw;   left: 25vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
+<img id="T2_S" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 14vw;   left: 25vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
+<img id="T2_T" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 13.5vw; left: 25.5vw; transform-origin: top left; transform:rotate(315deg) translate(-100%, 0%);">
+<img id="B1"   class="skinne" src="skinne_kold.jpg" style="width: 10vw;   top: 19vw;   left: 25vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
+<img id="B2"   class="skinne" src="skinne_varm.gif" style="width: 13.5vw; top: 17vw;   left: 22vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
+<img id="T1_S" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 29vw;   left: 25vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
+<img id="T1_T" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 30.5vw; left: 22vw; transform-origin: top left; transform:rotate(235deg) translate(-100%, 0%);">
+<img id="B9_7" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 34vw;   left: 25vw; transform-origin: top left; transform:rotate(270deg) translate(-100%, 0%);">
+<img id="B9_6" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 38vw;   left: 21vw; transform-origin: bottom right;  transform: rotate(-45deg);">
+<img id="B9_5" class="skinne" src="skinne_varm.gif" style="width: 13.5vw; top: 41.5vw; left: 9vw;">
+<img id="B9_4" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 38vw;   left:  5vw;   transform-origin: bottom left;   transform: rotate(45deg);">
+<img id="B9_3" class="skinne" src="skinne_varm.gif" style="width: 30vw;   top:  9vw;   left:  5vw;   transform-origin: top left;      transform: rotate(90deg)  translate(0, -100%);">
+<img id="B9_2" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  5vw;   left: 4.5vw;  transform-origin: bottom right;  transform: rotate(135deg) translate(100%, 100%);">
+<img id="B9_1" class="skinne" src="skinne_varm.gif" style="width: 16vw;   top:  5vw;   left:  9vw;   transform-origin: center center; transform: rotate(180deg);">
+<img id="T3_S" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  5vw;   left: 25vw;   transform-origin: center center; transform: rotate(180deg);">
+<img id="T3_T" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  5vw;   left: 24.5vw; transform-origin: bottom right;  transform: rotate(-45deg);">
+<img id="B4"   class="skinne" src="skinne_varm.gif" style="width: 10vw;   top:  5vw;   left: 29vw;">
+<img id="T4_S" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  5vw;   left: 34vw;   transform-origin: center center; transform: rotate(0deg);">
+<img id="T4_T" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  4vw;   left: 29.5vw; transform-origin: bottom right;  transform: rotate(45deg) translate(100%, 100%);">
+<img id="B5"   class="skinne" src="skinne_varm.gif" style="width: 10vw;   top:  8.5vw; left: 37.5vw;">
+<img id="B6"   class="skinne" src="skinne_varm.gif" style="width:  8vw;   top:  5vw;   left: 39vw;">
+<img id="T5_S" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  5vw;   left: 46vw;   transform-origin: center center; transform: rotate(0deg);">
+<img id="T5_T" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  4vw;   left: 45.5vw; transform-origin: bottom right;  transform: rotate(-45deg) translate(0%, 100%);">
+<img id="B7"   class="skinne" src="skinne_varm.gif" style="width: 10vw;   top:  5vw;   left: 51vw;">
+<img id="T6_S" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  5vw;   left: 61vw;   transform-origin: center center; transform: rotate(180deg);">
+<img id="T6_T" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  4vw;   left: 56.5vw; transform-origin: bottom right;  transform: rotate(45deg) translate(100%, 100%);">
+<img id="B8_7" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  5vw;   left: 66vw;   transform-origin: center center; transform: rotate(180deg);">
+<img id="B8_6" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top:  6.7vw; left: 70vw;   transform-origin: center center; transform: rotate(-135deg);">
+<img id="B8_5" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 10.5vw; left: 71.5vw; transform-origin: center center; transform: rotate(-90deg);">
+<img id="B8_4" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 12vw;   left: 69vw;   transform-origin: bottom right;  transform: rotate(-45deg) translate(0%, 100%);">
+<img id="B8_3" class="skinne" src="skinne_varm.gif" style="width:  4vw;   top: 16.5vw; left: 67vw;   transform-origin: center center; transform: rotate(0deg);">
+<img id="B8_2" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 12vw;   left: 59.5vw; transform-origin: bottom right;  transform: rotate(45deg) translate(100%, 100%);">
+<img id="B8_1" class="skinne" src="skinne_varm.gif" style="width:  5vw;   top: 10.5vw; left: 62vw;   transform-origin: center center; transform: rotate(90deg);">
+
+<div class="slidecontainer" style="top: 30vw; left: 25vw;">
+  <input type="range" min="0" max="100" value="0" class="slider" id="Power1">
+</div>	
+<input id="stop1"  type="button" class="placedButton" value="STOP"  style="top: 41.5vw; left: 33.5vw;">
+<input id="reset1" type="button" class="placedButton" value="RESET" style="top: 43.5vw; left: 33.5vw;">
+
+<div class="slidecontainer" style="top: 30vw; left: 45vw;">
+  <input type="range" min="0" max="100" value="0" class="slider" id="Power2">
+</div>	
+<input id="stop2"  type="button" class="placedButton" value="STOP"  style="top: 41.5vw; left: 53.5vw;">
+<input id="reset2" type="button" class="placedButton" value="RESET" style="top: 43.5vw; left: 53.5vw;">
+
+	
+<div class="checkbox" style="top: 17vw; left: 35vw">
+  <input type="checkbox" id="automode" name="automode" onclick="autoCheckbox()">
+  <label id="automodelabel" for="automode">Run trains automatically</label>
+</div>
+
+<script src="togbane.js"></script>
+</body>
+</html> 
