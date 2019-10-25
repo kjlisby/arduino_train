@@ -14,8 +14,14 @@ class SDWebServer {
     bool loadFromSdCard (String path);
   private:
     uint8_t sd_pin;
-    const char* ssid = "TDC-F4B8";
-    const char* password = "5214CD15C";
+    
+    #include "MySecretPassword.h"
+    // You must have a file named MySecretPassword.h
+    // and that file must contain the SSID and the password
+    // for your WIFI. Syntax as follows:
+    // const char* ssid = "xxxxxx";
+    // const char* password = "yyyyyyy";
+
     WebServer *server;
     IPAddress *apIP;
     IPAddress *staticIP;
