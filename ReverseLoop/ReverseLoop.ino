@@ -12,10 +12,10 @@
 #define SD_D0_MISO_PIN 19
 #define I2C_SDA_PIN    21
 #define I2C_SCL_PIN    22
-#define TURNOUT1_PIN   15
-#define TURNOUT2_PIN   15
-#define TURNOUT3_PIN   15
-#define TURNOUT4_PIN   15
+#define TURNOUT1_PIN    4
+#define TURNOUT2_PIN   12
+#define TURNOUT3_PIN   13
+#define TURNOUT4_PIN   14
 #define TURNOUT5_PIN   15
 #define TURNOUT6_PIN   16
 #define TRAIN_SENSOR1  34 // This port has no internal pullup, so an external 10-100k is needed
