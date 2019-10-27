@@ -49,6 +49,7 @@ void ReverseLoop::Loop() {
 	} else if (this->wait_for_train_to_stop) {
 		if (this->psu->GetActualSpeed() == 0) {
 			this->wait_for_train_to_stop = false;
+			this->td->AcknowledgeTrainSeen();
 			this->tdcb();
 		}
 	}
