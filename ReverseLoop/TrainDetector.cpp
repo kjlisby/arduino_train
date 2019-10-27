@@ -13,11 +13,16 @@ bool TrainDetector::TrainSeen () {
 }
 
 void TrainDetector::AcknowledgeTrainSeen () {
-	this->trainDetectionMillis = 0;
+	*(this->trainDetectionMillis) = 0;
 }
 
-void TrainDetector::Init (uint8_t Pin, volatile unsigned long * TrainDetectionTimeVariable) {
+String TrainDetector::BlockName() {
+	return this->block_name;
+}
+
+void TrainDetector::Init (uint8_t Pin, volatile unsigned long * TrainDetectionTimeVariable, String BlockName) {
+	this->block_name = BlockName;
 	this->reed_pin = Pin;
-  this->trainDetectionMillis = TrainDetectionTimeVariable;
+	this->trainDetectionMillis = TrainDetectionTimeVariable;
 	pinMode (this->reed_pin, INPUT_PULLUP); 
 }
