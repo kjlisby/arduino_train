@@ -1,163 +1,130 @@
-var i = 0
-function myFunction() {
-  document.getElementById("demo").innerHTML = "Hello JavaScript!"+i
-  i++
-}
+var Train1Position = "B7_loco";
+var Train2Position = "B2_loco";
 
-function flip(idToFlip) {
-	var elementToFlip = document.getElementById(idToFlip);
-	var transform_string = elementToFlip.style.transform;
-	var angle_str = "0";
-	if (transform_string.indexOf("otate(") > 0) {
-		pos1 = transform_string.indexOf("(")+1;
-		pos2 = transform_string.indexOf("deg")
-		angle_str = transform_string.slice(pos1, pos2);
+function GetStatus(){
+	var request = new XMLHttpRequest();
+	request.onreadystatechange = function(){
+	if(this.readyState == 4 && this.status == 200) {
+		  UpdatePage(this.responseText);
+		}
 	}
-	var angle = Number(angle_str);
-	if (angle < 180) {
-		angle = angle + 180;
-	} else {
-		angle = angle - 180;
-	}
-	document.getElementById("demo").innerHTML = angle;
-	elementToFlip.style.transform = "rotate("+angle+"deg)";
+	request.open("GET", "ajax_getstatus&random="+Math.random()*1000000,true);
+	request.send(null)
+	setTimeout('GetStatus()',10000);
 }
 
-function warm(myId) {
-	document.getElementById(myId).src = "skinne_varm.gif";
+function flip(idToFlip, wanted_rotation) {
+	document.getElementById(idToFlip).style.transform = "rotate("+wanted_rotation+"deg)";
 }
 
-function cold(myId) {
-	document.getElementById(myId).src = "skinne_kold.jpg";
+function warm(PS_class) {
+  var x = document.getElementsByClassName(PS_class);
+  var i;
+  for (i = 0; i < x.length; i++) {
+    x[i].src = "skinne_varm.gif";
+  }
 }
 
-var slider = document.getElementById("Power1");
+function cold(PS_class) {
+  var x = document.getElementsByClassName(PS_class);
+  var i;
+  for (i = 0; i < x.length; i++) {
+    x[i].src = "skinne_kold.jpg";
+  }
+}
+
+function setPower(psu, value) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      UpdatePage(this.responseText);
+    }
+  };
+  xhttp.open("GET", "ajax_set_"+psu+"_"+value, true);
+  xhttp.send();
+}
+var psu1_slider = document.getElementById("Power1");
+psu1_slider.oninput = function() {
+  setPower("psu1", this.value);
+}
+var psu2_slider = document.getElementById("Power2");
+psu2_slider.oninput = function() {
+  setPower("psu2", this.value);
+}
+
+var x = document.getElementsByClassName("klikbar");
+var i;
+for (i = 0; i < x.length; i++) {
+  x[i].onclick = function() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        UpdatePage(this.responseText);
+      }
+  };
+  xhttp.open("GET", "ajax_set_"+this.id, true);
+  xhttp.send();
+  }
+}
+
 var output = document.getElementById("demo");
-slider.oninput = function() {
-  setPower1(this.value);
-}
-document.getElementById('reset1').onclick = function(){
- document.getElementById('Power1').value = 0;
- setPower1(slider.value);
-}
-function setPower1(value) {
- /*
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      power1set(value);
+function UpdatePage(jsonString) {
+  output.innerHTML = jsonString;
+  var i;
+  var obj_list = JSON.parse(jsonString);
+  for (i in obj_list.objects) {
+    //output.innerHTML += " "+obj_list.objects[i].item+":"+obj_list.objects[i].value;
+    if (obj_list.objects[i].item == "automode") {
+      var autobox       = document.getElementById("automode");
+      var automodelabel = document.getElementById("automodelabel");
+      if (obj_list.objects[i].value == "1") {
+        automodelabel.style.color = "red";
+        autobox.checked = true;
+      } else {
+        automodelabel.style.color = "black";
+        autobox.checked = false;
+      }
+    } else if (obj_list.objects[i].item == "Power1") {
+      psu1_slider.value = obj_list.objects[i].value;
+      if (obj_list.objects[i].value >= 0) {
+        flip("B4", 0);
+      } else {
+        flip("B4", 180);
+      }
+      if (obj_list.objects[i].value == 0) {
+        cold("PS1");
+      } else {
+        warm("PS1");
+      }
+    } else if (obj_list.objects[i].item == "Power2") {
+      psu2_slider.value = obj_list.objects[i].value;
+      if (obj_list.objects[i].value >= 0) {
+        flip("B7", 0);
+      } else {
+        flip("B7", 180);
+      }
+      if (obj_list.objects[i].value == 0) {
+        cold("PS2");
+      } else {
+        warm("PS2");
+      }
+    } else if (obj_list.objects[i].item.charAt(0) == 'T' && obj_list.objects[i].item.length == 2) {
+      if (obj_list.objects[i].value == "closed") {
+        document.getElementById("T"+obj_list.objects[i].item.charAt(1)+"_S").style.visibility="visible";
+        document.getElementById("T"+obj_list.objects[i].item.charAt(1)+"_T").style.visibility="hidden";
+      } else {
+        document.getElementById("T"+obj_list.objects[i].item.charAt(1)+"_S").style.visibility="hidden";
+        document.getElementById("T"+obj_list.objects[i].item.charAt(1)+"_T").style.visibility="visible";
+      }
+    } else if (obj_list.objects[i].item == "train1Pos") {
+      document.getElementById(Train1Position).style.visibility="hidden";
+      Train1Position = obj_list.objects[i].value+"_loco";
+      document.getElementById(Train1Position).style.visibility="visible";
+    } else if (obj_list.objects[i].item == "train2Pos") {
+      document.getElementById(Train2Position).style.visibility="hidden";
+      Train2Position = obj_list.objects[i].value+"_loco";
+      document.getElementById(Train2Position).style.visibility="visible";
     }
-  };
-  xhttp.open("GET", "ajax_set_power1_"+value, true);
-  xhttp.send();
-  */
-  output.innerHTML = value;
-}
+  } /* list iteration */
+} /* function UpdatePage */
 
-
-var t1s = document.getElementById("T1_S");
-var t1t = document.getElementById("T1_T");
-var t2t = document.getElementById("T2_T");
-var t2s = document.getElementById("T2_S");
-var t3s = document.getElementById("T3_S");
-var t3t = document.getElementById("T3_T");
-var t4t = document.getElementById("T4_T");
-var t4s = document.getElementById("T4_S");
-var t5s = document.getElementById("T5_S");
-var t5t = document.getElementById("T5_T");
-var t6t = document.getElementById("T6_T");
-var t6s = document.getElementById("T6_S");
-var b1 = document.getElementById("B1");
-var b2 = document.getElementById("B2");
-var b5 = document.getElementById("B5");
-var b6 = document.getElementById("B6");
-t1s.onclick = function(){
- activateB2();
-}
-t2s.onclick = function(){
- activateB2();
-}
-t1t.onclick = function(){
- activateB1();
-}
-t2t.onclick = function(){
- activateB1();
-}
-b1.onclick = function(){
- activateB1();
-}
-b2.onclick = function(){
- activateB2();
-}
-function activateB1() {
-/*  call the ESP32 to activate B1 */
-
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      B1activated();
-    }
-  };
-  xhttp.open("GET", "ajax_set_B1", true);
-  xhttp.send();
-
- /*
- B1activated();
- */
-}
-function activateB2() {
-/*  call the ESP32 to activate B2 */
-
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      B2activated();
-    }
-  };
-  xhttp.open("GET", "ajax_set_B2", true);
-  xhttp.send();
-
- /*
- B2activated();
- */
-}
-function B1activated() {
- output.innerHTML = "B1 active";
- t1t.style.visibility="hidden";
- t2t.style.visibility="hidden";
- t1s.style.visibility="visible";
- t2s.style.visibility="visible";
- b1.src = "skinne_varm.gif";
- b2.src = "skinne_kold.jpg";
-}
-function B2activated() {
- output.innerHTML = "B2 active";
- t1s.style.visibility="hidden";
- t2s.style.visibility="hidden";
- t1t.style.visibility="visible";
- t2t.style.visibility="visible";
- b2.src = "skinne_varm.gif";
- b1.src = "skinne_kold.jpg";
-}
-
-var autobox       = document.getElementById("automode");
-var automodelabel = document.getElementById("automodelabel");
-function autoCheckbox() {
- if (autobox.checked == true) {
-	 automodelabel.style.color = "red";
- } else {
-	 automodelabel.style.color = "black";
- }
- /*  call the ESP32 to activate auto mode
-
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      
-    }
-  };
-  xhttp.open("GET", "ajax_set_automode_"+autobox.checked, true);
-  xhttp.send();
-
- */
-}

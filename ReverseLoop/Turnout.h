@@ -6,10 +6,11 @@
 
 class Turnout {
 	public:
-		void Init(uint8_t ServoPin);
-		void Throw();
-		void Close();
-		void Loop();
+		void   Init(uint8_t ServoPin);
+		void   Throw();
+		void   Close();
+		void   Loop();
+    String GetPosition();
 	private:
 		uint8_t servo_pin;
 		Servo turnout;
@@ -17,6 +18,7 @@ class Turnout {
 		int pos_dest;
 		unsigned long last_millis = 0;
 		int detach_timer = 0;
+		String current_position = "unknown";
 };
 
 #endif
