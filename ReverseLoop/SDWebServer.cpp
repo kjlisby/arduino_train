@@ -87,6 +87,7 @@ SDWebServer::SDWebServer() {
     Serial.println(ssid);
     while (1) {
       delay(500);
+      ESP.restart();
     }
   }
   Serial.print("Connected! IP address: ");
