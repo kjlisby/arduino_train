@@ -9,15 +9,17 @@
 class ReverseLoop {
 	public:
 		void Init(PowerSupply *PSU, Turnout *TU, TrainDetector *TD, void (*TrainDetectedCallback)());
-		void Attention();
-    void Loop();
+		void Attention(String *TrainPosition);
+		void Loop();
 	private:
-    PowerSupply *psu;
-		Turnout *tu;
+		PowerSupply   *psu;
+		Turnout       *tu;
 		TrainDetector *td;
+		String        *train_position;
 		void (*tdcb)();
-    bool active;
-    unsigned long wait_millis;
+		bool active;
+		bool wait_for_train_to_stop;
+		unsigned long wait_millis;
 };
 
 #endif

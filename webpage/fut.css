@@ -27,16 +27,6 @@ p {
 	display: block;
 }
 
-.loco {
-	object-fit: cover;
-	width: auto;
-	height: auto;
-	position:absolute;
-	margin: 0 0 0 0;
-	display: block;
-	visibility: hidden;
-}
-
 .placedButton {
 	position:absolute;
 }
