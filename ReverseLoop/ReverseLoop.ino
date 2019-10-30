@@ -1,4 +1,5 @@
 #include "SDWebServer.h"
+#include "OTAHandler.h"
 #include "AjaxHandler.h"
 #include "PowerSupply.h"
 #include "Turnout.h"
@@ -29,6 +30,7 @@
 #define PSU2_ADC_PIN   33
 #define PSU2_POL_PIN   27
 SDWebServer   *WS;
+OTAHandler    *OH;
 AjaxHandler   *AH;
 PowerSupply   *PSU1;
 PowerSupply   *PSU2;
@@ -137,6 +139,8 @@ void setup(void) {
 	Serial.print("\n");
 	WS = new SDWebServer();
 	WS->getServer()->onNotFound(SDWebServer_handleNotFound);
+	OH = new OTAHandler();
+    OH->Init();
 	AH = new AjaxHandler();
 	AH->Init(WS->getServer());
 	WS->Init(SD_CS_PIN);
@@ -151,6 +155,7 @@ void setup(void) {
 
 void loop(void) {
 	WS->getServer()->handleClient();
+	OH->Loop();
 	PSU1->Loop();
 	PSU2->Loop();
 	TU1->Loop();
