@@ -59,53 +59,64 @@ bool SDWebServer::loadFromSdCard (String path) {
   return true;
 }
 
-SDWebServer::SDWebServer() {
+void SDWebServer::setupNetwork(bool AP) {
   this->server   = new WebServer(80);
   this->apIP     = new IPAddress(42, 42, 42, 42);
   this->staticIP = new IPAddress(192,168,1,200);
   this->gateway  = new IPAddress(192,168,1,1);
   this->subnet   = new IPAddress(255,255,255,0);
   WiFi.persistent(false);
-//  WiFi.mode(WIFI_AP_STA);
-  WiFi.config(*(this->staticIP), *(this->gateway), *(this->subnet));
-//  WiFi.softAPConfig(*(this->apIP), *(this->apIP), *(this->subnet));
-//  WiFi.softAP(this->ssid, this->password); 
-//  IPAddress myAPIP = WiFi.softAPIP(); 
-//  Serial.print("AP IP address: "); 
-//  Serial.println(myAPIP); 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  // Wait for connection
-  uint8_t i = 0;
-  while (WiFi.status() != WL_CONNECTED && i++ < 20) {//wait 10 seconds
-    delay(500);
-  }
-  if (i == 21) {
-    Serial.print("Could not connect to");
+  if (AP) {
+    WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(*(this->apIP), *(this->apIP), *(this->subnet));
+    WiFi.softAP(APssid, APpassword);
+    IPAddress myAPIP = WiFi.softAPIP();
+    Serial.print("AP IP address: ");
+    Serial.println(myAPIP);
+  } else {
+    WiFi.config(*(this->staticIP), *(this->gateway), *(this->subnet));
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting to ");
     Serial.println(ssid);
-    while (1) {
+    // Wait for connection
+    uint8_t i = 0;
+    while (WiFi.status() != WL_CONNECTED && i++ < 20) {//wait 10 seconds
       delay(500);
-      ESP.restart();
     }
+    if (i == 21) {
+      Serial.print("Could not connect to");
+      Serial.println(ssid);
+      while (1) {
+        delay(500);
+        ESP.restart();
+      }
+    }
+    Serial.print("Connected! IP address: ");
+    Serial.println(WiFi.localIP());
   }
-  Serial.print("Connected! IP address: ");
-  Serial.println(WiFi.localIP());
 }
 
 bool INITIALIZED = false;
 void SDWebServer::Init(uint8_t SDPin) {
   if (INITIALIZED) return;
   INITIALIZED = true;
-  
+  Serial.println("SDWebServer::Init");
   this->sd_pin = SDPin;
-  server->begin();
-  Serial.println("HTTP server started");
   if (SD.begin(this->sd_pin)) {
     Serial.println("SD Card initialized.");
   }
-  loadFromSdCard("/");
+  File dataFile = SD.open("/APmode");
+  if (dataFile) {
+    Serial.println("AP mode");
+    dataFile.close();
+    this->setupNetwork(true);
+  } else {
+    Serial.println("STA mode");
+    this->setupNetwork(false);
+  }
+  server->begin();
+  Serial.println("HTTP server started");
 }
 
 WebServer *SDWebServer::getServer() {

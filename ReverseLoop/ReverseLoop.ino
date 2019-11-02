@@ -138,12 +138,12 @@ void setup(void) {
 	Serial.setDebugOutput(true);
 	Serial.print("\n");
 	WS = new SDWebServer();
+	WS->Init(SD_CS_PIN);
 	WS->getServer()->onNotFound(SDWebServer_handleNotFound);
 	OH = new OTAHandler();
 	OH->Init();
 	AH = new AjaxHandler();
 	AH->Init(WS->getServer());
-	WS->Init(SD_CS_PIN);
 	InitPowerSupplies();
 	InitTurnouts();
 	InitTrainDetectors();

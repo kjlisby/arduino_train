@@ -8,7 +8,6 @@
 
 class SDWebServer {
   public:
-    SDWebServer();
     void Init(uint8_t SDPin);
     WebServer *getServer();
     bool loadFromSdCard (String path);
@@ -18,9 +17,11 @@ class SDWebServer {
     #include "MySecretPassword.h"
     // You must have a file named MySecretPassword.h
     // and that file must contain the SSID and the password
-    // for your WIFI. Syntax as follows:
+    // for your WIFI and for your ESP32 in AP mode. Syntax as follows:
     // const char* ssid = "xxxxxx";
     // const char* password = "yyyyyyy";
+    // const char* APssid = "zzzzzz";
+    // const char* APpassword = "vvvvvvv";
 
     WebServer *server;
     IPAddress *apIP;
@@ -29,6 +30,7 @@ class SDWebServer {
     IPAddress *subnet;
     void returnOK();
     void returnFail (String msg);
+    void setupNetwork(bool AP);
 };
 
 #endif
