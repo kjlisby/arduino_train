@@ -140,7 +140,7 @@ void setup(void) {
 	WS = new SDWebServer();
 	WS->getServer()->onNotFound(SDWebServer_handleNotFound);
 	OH = new OTAHandler();
-    OH->Init();
+	OH->Init();
 	AH = new AjaxHandler();
 	AH->Init(WS->getServer());
 	WS->Init(SD_CS_PIN);
