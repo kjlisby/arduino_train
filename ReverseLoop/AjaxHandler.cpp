@@ -68,6 +68,16 @@ class InternalAjaxHandler : public RequestHandler {
     RetVal += JSON_item("AutoMode",String(AutoMode));
     RetVal += JSON_ArrayDivider()+JSON_item("Power1", String(PSU1->GetSpeed()));
     RetVal += JSON_ArrayDivider()+JSON_item("Power2", String(PSU2->GetSpeed()));
+    if (!PSU1->GetStatus()) {
+      RetVal += JSON_ArrayDivider()+JSON_item("PSU1FB", "DISABLED");
+    } else {
+      RetVal += JSON_ArrayDivider()+JSON_item("PSU1FB", String(analogRead(32)));
+    }
+    if (!PSU2->GetStatus()) {
+      RetVal += JSON_ArrayDivider()+JSON_item("PSU2FB", "DISABLED");
+    } else {
+      RetVal += JSON_ArrayDivider()+JSON_item("PSU2FB", String(analogRead(33)));
+    }
     RetVal += JSON_ArrayDivider()+JSON_item("T1", TU1->GetPosition());
     RetVal += JSON_ArrayDivider()+JSON_item("T2", TU2->GetPosition());
     RetVal += JSON_ArrayDivider()+JSON_item("T3", TU3->GetPosition());

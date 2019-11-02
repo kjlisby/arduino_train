@@ -69,7 +69,8 @@ for (i = 0; i < x.length; i++) {
 
 var output = document.getElementById("demo");
 function UpdatePage(jsonString) {
-  output.innerHTML = jsonString;
+  output.innerHTML = "";
+  //output.innerHTML = jsonString;
   var i;
   var obj_list = JSON.parse(jsonString);
   for (i in obj_list.objects) {
@@ -84,6 +85,10 @@ function UpdatePage(jsonString) {
         automodelabel.style.color = "black";
         autobox.checked = false;
       }
+    } else if (obj_list.objects[i].item == "PSU1FB") {
+      output.innerHTML += " "+obj_list.objects[i].item+":"+obj_list.objects[i].value;
+    } else if (obj_list.objects[i].item == "PSU2FB") {
+      output.innerHTML += " "+obj_list.objects[i].item+":"+obj_list.objects[i].value;
     } else if (obj_list.objects[i].item == "Power1") {
       psu1_slider.value = obj_list.objects[i].value;
       if (obj_list.objects[i].value >= 0) {
