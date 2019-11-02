@@ -20,6 +20,7 @@ class PowerSupply {
 		uint8_t relay_pin;
 		int     current_speed = 0; // 0-255 equals 0-3.3V equals 0 - 18V
 		int     desired_speed = 0;
+		int     short_counter = 0;
 		unsigned long last_millis;
 		bool    direction_reversed = false;
 		bool    PSUstatus = true;

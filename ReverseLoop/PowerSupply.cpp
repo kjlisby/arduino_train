@@ -54,6 +54,7 @@ bool PowerSupply::GetStatus() {
 }
 
 void PowerSupply::ResetStatus() {
+  Serial.println("PowerSupply::ResetStatus");
 	this->PSUstatus = true;
 }
 
@@ -63,8 +64,14 @@ void PowerSupply::PollShortcircuit() {
 		Serial.print("Short circuit detection measure: ");
 		Serial.println(value);
 	}
-	if (value > 1000 && millis() > 5000) {
-		this->Disable();
+	if (value > 750 && millis() > 5000) { // ignore the first 5 seconds, then disable at ~0,7V ~ 1,4A @0,5 ohm
+		short_counter++;
+		if (short_counter > 10) {
+			// This is not just a spike
+			this->Disable();
+		}
+	} else {
+		short_counter = 0;
 	}
 }
 
