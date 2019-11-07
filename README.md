@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# arduino_train
-Arduino sketches for controlling my specific train layout
-=======
 # Arduino code for garden train control
 Arduino sketches for controlling my specific train layout utilizing an ESP32.
 
@@ -28,4 +24,3 @@ The hardware consist of:
   - Possibly I2C DAC and ADC modules if there is a need for more than two power amplifiers
 
 See more at http://lisby.dk/wordpress/?p=2106 (so far only in Danish).
->>>>>>> 8ea88b605b6db311ffbe342b107a8a424156c0f1
