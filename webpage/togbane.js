@@ -89,6 +89,10 @@ function UpdatePage(jsonString) {
       output.innerHTML += " "+obj_list.objects[i].item+":"+obj_list.objects[i].value;
     } else if (obj_list.objects[i].item == "PSU2FB") {
       output.innerHTML += " "+obj_list.objects[i].item+":"+obj_list.objects[i].value;
+    } else if (obj_list.objects[i].item == "TD1") {
+      output.innerHTML += " "+obj_list.objects[i].item+":"+obj_list.objects[i].value;
+    } else if (obj_list.objects[i].item == "TD2") {
+      output.innerHTML += " "+obj_list.objects[i].item+":"+obj_list.objects[i].value;
     } else if (obj_list.objects[i].item == "Power1") {
       psu1_slider.value = obj_list.objects[i].value;
       if (obj_list.objects[i].value >= 0) {

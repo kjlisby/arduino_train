@@ -39,6 +39,7 @@ p {
 
 .placedButton {
 	position:absolute;
+	font-size: 1.9vw;
 }
 
 .slidecontainer {

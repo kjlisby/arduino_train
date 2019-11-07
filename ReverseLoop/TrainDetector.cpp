@@ -9,7 +9,7 @@ bool TrainDetector::TrainSeen () {
 		return true;
 	}
 	*(this->trainDetectionMillis) = 0;
-	return true;
+	return false;
 }
 
 void TrainDetector::AcknowledgeTrainSeen () {

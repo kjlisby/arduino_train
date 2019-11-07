@@ -19,10 +19,10 @@
 #define TURNOUT4_PIN   14
 #define TURNOUT5_PIN   15
 #define TURNOUT6_PIN   16
-#define TRAIN_SENSOR1  34 // This port has no internal pullup, so an external 10-100k is needed
-#define TRAIN_SENSOR2  35 // This port has no internal pullup, so an external 10-100k is needed
-#define TRAIN_SENSOR3  36 // This port has no internal pullup, so an external 10-100k is needed
-#define TRAIN_SENSOR4  39 // This port has no internal pullup, so an external 10-100k is needed
+#define TRAIN_SENSOR1  36 // This port has no internal pullup, so an external 10-100k is needed
+#define TRAIN_SENSOR2  34 // This port has no internal pullup, so an external 10-100k is needed
+#define TRAIN_SENSOR3  39 // This port has no internal pullup, so an external 10-100k is needed
+#define TRAIN_SENSOR4  35 // This port has no internal pullup, so an external 10-100k is needed
 #define PSU1_DAC_PIN   25
 #define PSU1_ADC_PIN   32
 #define PSU1_POL_PIN   17
@@ -44,7 +44,7 @@ TrainDetector *TD1;
 TrainDetector *TD2;
 TrainDetector *TD3;
 TrainDetector *TD4;
-ReverseLoop   *RL1;
+//ReverseLoop   *RL1;
 ReverseLoop   *RL2;
 bool          AutoMode = false;
 String        Train1Position = "B7";
@@ -85,9 +85,9 @@ void InitTrainDetectors () {
 	TD1 = new TrainDetector();
 	TD1->Init(TRAIN_SENSOR1, &trainDetectionMillis1, "B8");
 	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR1), handleTrainDetectorInterrupt1, FALLING);
-	// TD2 = new TrainDetector();
-	// TD2->Init(TRAIN_SENSOR2, &trainDetectionMillis2);
-	// attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR2), handleTrainDetectorInterrupt2, FALLING);
+	TD2 = new TrainDetector();
+	TD2->Init(TRAIN_SENSOR2, &trainDetectionMillis2, "B7");
+	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR2), handleTrainDetectorInterrupt2, FALLING);
 	// TD3 = new TrainDetector();
 	// TD3->Init(TRAIN_SENSOR3, &trainDetectionMillis3);
 	// attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR3), handleTrainDetectorInterrupt3, FALLING);
@@ -147,10 +147,10 @@ void setup(void) {
 	InitPowerSupplies();
 	InitTurnouts();
 	InitTrainDetectors();
-	RL1 = new ReverseLoop();
-	RL1->Init(PSU1, TU3, TD1, LoopDone);
+//	RL1 = new ReverseLoop();
+//	RL1->Init(PSU1, TU3, TD1, TD2, LoopDone);
 	RL2 = new ReverseLoop();
-	RL2->Init(PSU2, TU6, TD1, LoopDone);
+	RL2->Init(PSU2, TU6, TD1, TD2, LoopDone);
 }
 
 void loop(void) {
@@ -165,7 +165,7 @@ void loop(void) {
 	TU5->Loop();
 	TU6->Loop();
 	AH->Loop();
-	RL1->Loop();
+//	RL1->Loop();
 	RL2->Loop();
 	if (NextLoopTime > 0) {
 		if (AutoMode && millis() > NextLoopTime) {

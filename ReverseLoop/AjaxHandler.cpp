@@ -78,6 +78,12 @@ class InternalAjaxHandler : public RequestHandler {
     } else {
       RetVal += JSON_ArrayDivider()+JSON_item("PSU2FB", String(analogRead(33)));
     }
+    if (TD1->TrainSeen()) {
+      RetVal += JSON_ArrayDivider()+JSON_item("TD1", "TD-1");
+    }
+    if (TD2->TrainSeen()) {
+      RetVal += JSON_ArrayDivider()+JSON_item("TD2", "TD-2");
+    }
     RetVal += JSON_ArrayDivider()+JSON_item("T1", TU1->GetPosition());
     RetVal += JSON_ArrayDivider()+JSON_item("T2", TU2->GetPosition());
     RetVal += JSON_ArrayDivider()+JSON_item("T3", TU3->GetPosition());

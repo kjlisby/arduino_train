@@ -1,12 +1,12 @@
 #include "ReverseLoop.h"
 
-void ReverseLoop::Init(PowerSupply *PSU, Turnout *TU, TrainDetector *TD, void (*TrainDetectedCallback)()) {
+void ReverseLoop::Init(PowerSupply *PSU, Turnout *TU, TrainDetector *TD, TrainDetector *TD2, void (*TrainDetectedCallback)()) {
 	this->psu = PSU;
 	this->tu = TU;
 	this->td = TD;
+	this->td2 = TD2;
 	this->tdcb = TrainDetectedCallback;
-	this->active = false;
-	this->wait_for_train_to_stop = false;
+	this->stat = Idle;
 	this->wait_millis = 0;
 }
 
@@ -16,40 +16,45 @@ void ReverseLoop::Attention(String *TrainPosition) {
 	this->psu->SetSpeed(0);
 	this->psu->ReverseDirection(false);
 	this->tu->Close();
-	this->active = true;
+	this->stat = Starting;
 	this->wait_millis = 5000+millis();
 }
 
 void ReverseLoop::Loop() {
-	if (this->active && this->wait_millis > 0) {
+	if (this->stat == Starting) {
 		if (millis() >= this->wait_millis) {
-			Serial.println("--------------- ReverseLoop forward at half speed");
-			this->wait_millis = 0;
-			this->psu->SetSpeed(128);
-			Serial.println("--------------- ReverseLoop forward at half speed - out of this->psu->SetSpeed");
+			Serial.println("--------------- ReverseLoop forward");
+			this->wait_millis = 20000+millis();
+			this->stat = LookForFirstTD;
+			this->psu->SetSpeed(192);
 		}
-	} else if (!this->active && this->wait_millis > 0) {
-		if (millis() >= this->wait_millis) {
-			Serial.println("--------------- ReverseLoop stop at destination");
-			this->wait_millis = 0;
-			this->psu->SetSpeed(0);
-			this->wait_for_train_to_stop = true;
-		}
-	} else if (this->active) {
-		if (this->td->TrainSeen()) {
-			Serial.println("--------------- ReverseLoop reversing at block "+this->td->BlockName());
+	} else if (this->stat == LookForFirstTD) {
+		if (this->td->TrainSeen() || millis() >= this->wait_millis) {
 			*(this->train_position) = this->td->BlockName();
-			Serial.println("--------------- ReverseLoop reversing *(this->train_position)="+*(this->train_position));
 			this->tu->Throw();
 			this->psu->ReverseDirection(true);
 			this->td->AcknowledgeTrainSeen();
-			this->active = false;
-			this->wait_millis = 15000+millis();
+			this->td2->AcknowledgeTrainSeen();
+			this->stat = InLoop;
+			this->wait_millis = 40000+millis();
 		}
-	} else if (this->wait_for_train_to_stop) {
+	} else if (this->stat == InLoop) {
+		if (this->td2->TrainSeen() || millis() >= this->wait_millis) {
+			this->wait_millis = 100+millis();
+			this->psu->SetSpeed(128);
+			this->stat = RunToPlatform;
+		}
+	} else if (this->stat == RunToPlatform) {
+		if (millis() >= this->wait_millis) {
+			this->wait_millis = 0;
+			this->psu->SetSpeed(0);
+			this->stat = Stopping;
+		}
+	} else if (this->stat == Stopping) {
 		if (this->psu->GetActualSpeed() == 0) {
-			this->wait_for_train_to_stop = false;
 			this->td->AcknowledgeTrainSeen();
+			this->td2->AcknowledgeTrainSeen();
+			this->stat = Idle;
 			this->tdcb();
 		}
 	}
