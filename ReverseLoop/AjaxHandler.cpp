@@ -19,7 +19,7 @@ extern void          ToggleAutoMode();
 extern String        Train1Position;
 extern String        Train2Position;
 
-#define ledPin LED_BUILTIN
+//#define ledPin LED_BUILTIN
 
 String JSON_ArrayStart() {
   return "{\"objects\":[";
@@ -181,7 +181,7 @@ class InternalAjaxHandler : public RequestHandler {
   }
 } internalAjaxHandler;
 
-boolean LEDstate = false;
+//boolean LEDstate = false;
 void AjaxHandler::Loop() {
 //    bool old_reedState = reedState;
 //    reedState = TD1->TrainSeen();
@@ -195,20 +195,20 @@ void AjaxHandler::Loop() {
 //        PSU1->SetSpeed(0);
 //      }
 //    }
-    counter++;
-    if (counter > 500000) {
-      counter = 0;
-      Serial.print("TOGGLE LED ");
-      if (LEDstate) {
-        Serial.println("OFF");
-        LEDstate = false;
-        analogWrite(ledPin,0);
-      } else {
-        Serial.println("ON");
-        LEDstate = true;
-        analogWrite(ledPin,100);
-      }
-    }
+//    counter++;
+//    if (counter > 500000) {
+//      counter = 0;
+//      Serial.print("TOGGLE LED ");
+//      if (LEDstate) {
+//        Serial.println("OFF");
+//        LEDstate = false;
+//        analogWrite(ledPin,0);
+//      } else {
+//        Serial.println("ON");
+//        LEDstate = true;
+//        analogWrite(ledPin,100);
+//      }
+//    }
 }
 
 bool AJAXINITIALIZED = false;
@@ -216,6 +216,6 @@ void AjaxHandler::Init(WebServer *server) {
 	if (AJAXINITIALIZED) return;
 	AJAXINITIALIZED = true;
 	server->addHandler(&internalAjaxHandler);
-	pinMode ( ledPin, OUTPUT );
-	analogWrite ( ledPin, 0 );
+//	pinMode ( ledPin, OUTPUT );
+//	analogWrite ( ledPin, 0 );
 }

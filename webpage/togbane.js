@@ -1,7 +1,21 @@
 var Train1Position = "B7_loco";
 var Train2Position = "B2_loco";
 
-function GetStatus(){
+function Start() {
+  InitWS();
+  GetStatus();
+}
+
+var Socket;
+function InitWS() {
+  Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+  document.getElementById("logConsole").value += 'Listening on ws://' + window.location.hostname + ':81/';
+  Socket.onmessage = function(evt) {
+	  document.getElementById("logConsole").value += evt.data;
+  }
+}
+
+function GetStatus() {
 	var request = new XMLHttpRequest();
 	request.onreadystatechange = function(){
 	if(this.readyState == 4 && this.status == 200) {
@@ -10,7 +24,7 @@ function GetStatus(){
 	}
 	request.open("GET", "ajax_getstatus&random="+Math.random()*1000000,true);
 	request.send(null)
-	setTimeout('GetStatus()',10000);
+	setTimeout('GetStatus()',1000);
 }
 
 function flip(idToFlip, wanted_rotation) {

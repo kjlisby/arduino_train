@@ -1,4 +1,15 @@
 #include "SDWebServer.h"
+#include <WebSocketsServer.h>
+WebSocketsServer webSocket = WebSocketsServer(81);
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length){
+   if (type == WStype_TEXT){
+    for(int i = 0; i < length; i++) Serial.print((char) payload[i]);
+    Serial.println();
+   }
+}
+void SDWebServer::sendMessage (String message) {
+  webSocket.broadcastTXT(message);
+}
 
 void SDWebServer::returnOK () {
   this->server->send(200, "text/plain", "");
@@ -116,7 +127,13 @@ void SDWebServer::Init(uint8_t SDPin) {
     this->setupNetwork(false);
   }
   server->begin();
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
   Serial.println("HTTP server started");
+}
+
+void SDWebServer::Loop() {
+  webSocket.loop();
 }
 
 WebServer *SDWebServer::getServer() {

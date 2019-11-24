@@ -11,6 +11,8 @@ class SDWebServer {
     void Init(uint8_t SDPin);
     WebServer *getServer();
     bool loadFromSdCard (String path);
+    void sendMessage (String message);
+    void Loop();
   private:
     uint8_t sd_pin;
     

@@ -125,9 +125,11 @@ void StartLoop() {
 }
 void ToggleAutoMode() {
 	if (AutoMode) {
+		analogWrite(LED_BUILTIN,0);
 		AutoMode = false;
 		NextLoopTime = 0;
 	} else {
+		analogWrite(LED_BUILTIN,100);
 		AutoMode = true;
 		NextLoopTime = millis()+random(10000, 50000);
 	}
@@ -150,11 +152,14 @@ void setup(void) {
 //	RL1 = new ReverseLoop();
 //	RL1->Init(PSU1, TU3, TD1, TD2, LoopDone);
 	RL2 = new ReverseLoop();
-	RL2->Init(PSU2, TU6, TD1, TD2, LoopDone);
+	RL2->Init(WS, PSU2, TU6, TD1, TD2, LoopDone);
+	pinMode ( LED_BUILTIN, OUTPUT );
+	analogWrite ( LED_BUILTIN, 0 );
 }
 
 void loop(void) {
 	WS->getServer()->handleClient();
+  WS->Loop();
 	OH->Loop();
 	PSU1->Loop();
 	PSU2->Loop();
