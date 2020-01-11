@@ -3,16 +3,19 @@
 
 #include <stdint.h>
 #include <Arduino.h>
+#include "SDWebServer.h"
 
 class TrainDetector {
 	public:
-		void   Init (uint8_t Pin, volatile unsigned long * TrainDetectionTimeVariable, String BlockName);
+		void   Init (uint8_t Pin, String BlockName);
 		bool   TrainSeen ();
 		void   AcknowledgeTrainSeen ();
 		String BlockName();
+		void   Loop();
 	private:
+		unsigned long delayBeforeDetectMillis;
+		unsigned long trainDetectionMillis;
 		uint8_t reed_pin;
-		volatile unsigned long * trainDetectionMillis;
 		String block_name;
 };
 

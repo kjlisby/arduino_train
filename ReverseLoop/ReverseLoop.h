@@ -15,7 +15,7 @@ class ReverseLoop {
 		void Attention(String *TrainPosition);
 		void Loop();
 	private:
-    SDWebServer   *ws;
+		SDWebServer   *ws;
 		PowerSupply   *psu;
 		Turnout       *tu;
 		TrainDetector *td, *td2;

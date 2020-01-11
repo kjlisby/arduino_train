@@ -61,39 +61,15 @@ void SDWebServer_handleNotFound() {
 	WS->loadFromSdCard(WS->getServer()->uri());
 }
 
-volatile unsigned long trainDetectionMillis1 = 0;
-ICACHE_RAM_ATTR void handleTrainDetectorInterrupt1() {
-	Serial.println("handleTrainDetectorInterrupt1");
-	trainDetectionMillis1 = millis();
-}
-volatile unsigned long trainDetectionMillis2 = 0;
-ICACHE_RAM_ATTR void handleTrainDetectorInterrupt2() {
-//	Serial.println("handleTrainDetectorInterrupt2");
-	trainDetectionMillis2 = millis();
-}
-volatile unsigned long trainDetectionMillis3 = 0;
-ICACHE_RAM_ATTR void handleTrainDetectorInterrupt3() {
-//	Serial.println("handleTrainDetectorInterrupt3");
-	trainDetectionMillis3 = millis();
-}
-volatile unsigned long trainDetectionMillis4 = 0;
-ICACHE_RAM_ATTR void handleTrainDetectorInterrupt4() {
-//	Serial.println("handleTrainDetectorInterrupt4");
-	trainDetectionMillis4 = millis();
-}
 void InitTrainDetectors () {
 	TD1 = new TrainDetector();
-	TD1->Init(TRAIN_SENSOR1, &trainDetectionMillis1, "B8");
-	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR1), handleTrainDetectorInterrupt1, FALLING);
+	TD1->Init(TRAIN_SENSOR1, "B8");
 	TD2 = new TrainDetector();
-	TD2->Init(TRAIN_SENSOR2, &trainDetectionMillis2, "B7");
-	attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR2), handleTrainDetectorInterrupt2, FALLING);
+	TD2->Init(TRAIN_SENSOR2, "B7");
 	// TD3 = new TrainDetector();
-	// TD3->Init(TRAIN_SENSOR3, &trainDetectionMillis3);
-	// attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR3), handleTrainDetectorInterrupt3, FALLING);
+	// TD3->Init(TRAIN_SENSOR3, "B?");
 	// TD4 = new TrainDetector();
-	// TD4->Init(TRAIN_SENSOR4, &trainDetectionMillis4);
-	// attachInterrupt(digitalPinToInterrupt(TRAIN_SENSOR4), handleTrainDetectorInterrupt4, FALLING);
+	// TD4->Init(TRAIN_SENSOR4, "B?");
 }
 
 void InitTurnouts() {
@@ -159,8 +135,10 @@ void setup(void) {
 
 void loop(void) {
 	WS->getServer()->handleClient();
-  WS->Loop();
+	WS->Loop();
 	OH->Loop();
+	TD1->Loop();
+	TD2->Loop();
 	PSU1->Loop();
 	PSU2->Loop();
 	TU1->Loop();
