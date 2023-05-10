@@ -1,6 +1,11 @@
 #include "OTAHandler.h"
 #include <ArduinoOTA.h>
 
+// The OTAHandler is for updating the code on ESP32 over the air from within the
+// Arduino IDE. It is based on the OTA library, which is part of the basic ESP32 
+// support found here: https://github.com/espressif/arduino-esp32/blob/master/libraries/ArduinoOTA/examples/BasicOTA/BasicOTA.ino
+// but better described here: https://lastminuteengineers.com/esp32-ota-updates-arduino-ide/
+
 void OTAHandler::Init() {
   // Port defaults to 3232
   // ArduinoOTA.setPort(3232);
