@@ -2,6 +2,14 @@
 #include "Turnout.h"
 #include "PowerSupply.h"
 #include "TrainDetector.h"
+
+// The AjaxHandler is responding to commands sent bia HTTP requests by the JavaScript code that is executed in a browser somewhere.
+// There is no event mechanism. Just simple commands:
+//   - read the status of everything
+//   - set a turnout
+//   - adjust power
+//   - etc.
+
 extern PowerSupply   *PSU1;
 extern PowerSupply   *PSU2;
 extern Turnout       *TU1;
