@@ -186,6 +186,7 @@ class InternalAjaxHandler : public RequestHandler {
     } else {
       server.send(404, "text/plain", "Unknown AJAX command");
     }
+    return(true);
   }
 } internalAjaxHandler;
 
